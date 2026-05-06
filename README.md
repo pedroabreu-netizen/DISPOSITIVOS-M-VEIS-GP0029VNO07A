@@ -2,7 +2,7 @@
 
 SEPARAÇÃO DE TAREFAS 
 
-MEMBRO | FUNÇÃO \n
-João Victor Prado | Telas relacionadas ao fluxo de Agenda (Agenda Cuidador, Agenda Idoso, Overlay tarefas na tela Agenda) \n
-Guilherme Lobo brayner | Telas relacionadas ao fluxo Home (Tela Home, Modal de criação de tarefas) \n
+MEMBRO | FUNÇÃO <br/> 
+João Victor Prado | Telas relacionadas ao fluxo de Agenda (Agenda Cuidador, Agenda Idoso, Overlay tarefas na tela Agenda)<br/> 
+Guilherme Lobo brayner | Telas relacionadas ao fluxo Home (Tela Home, Modal de criação de tarefas)<br/> 
 
