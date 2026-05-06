@@ -11,4 +11,3 @@ Guilherme Lobo brayner | Telas relacionadas ao fluxo Notas (Tela Notas, Modal de
 Flávia Monique  | telas inicial, cadastro de atividades e visualização das atividades<br/> 
 João Luís | Telas relacionadas ao fluxo de login e cadastro<br/> 
 Pedro | Banco de Dados, engenharia de software<br/> 
-João Lyra | Tela "Arquivos"
