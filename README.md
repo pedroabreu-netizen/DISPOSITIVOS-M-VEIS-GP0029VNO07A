@@ -1,9 +1,14 @@
 # DISPOSITIVOS-MOVEIS-GP0029VNO07A
 
-SEPARAÇÃO DE TAREFAS 
+SEPARAÇÃO DE TAREFAS E FUNÇÕES
+---
+
+Cada membro ficou com um "fluxo" específico do app, sendo as tasks respectivas tanto de front quanto de back.
 
 MEMBRO | FUNÇÃO <br/> 
 João Victor Prado | Telas relacionadas ao fluxo de Agenda (Agenda Cuidador, Agenda Idoso, Overlay tarefas na tela Agenda)<br/> 
 Guilherme Lobo brayner | Telas relacionadas ao fluxo Notas (Tela Notas, Modal de criação de Notas)<br/> 
 Flávia Monique  | telas inicial, cadastro de atividades e visualização das atividades
 João Luís | Telas relacionadas ao fluxo de login e cadastro
+Pedro | Banco de Dados, engenharia de software
+João Lyra | Tela "Arquivos"
