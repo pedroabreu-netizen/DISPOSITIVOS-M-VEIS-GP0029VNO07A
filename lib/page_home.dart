@@ -49,6 +49,7 @@ class _HomePageState extends State<HomePage> {
   TimeOfDay? _horarioSelecionado;
 
   DateTime? _dataSelecionada;
+  String _repeticaoSelecionada = 'Nunca';
 
   Future<void> _salvarNoStorage() async {
     final prefs = await SharedPreferences.getInstance();
@@ -61,6 +62,7 @@ class _HomePageState extends State<HomePage> {
         "horario": tarefa.horario,
         "tipo": tarefa.tipo,
         "data": tarefa.data,
+        "repeticao": tarefa.repeticao,
       });
     }).toList();
 
@@ -90,6 +92,7 @@ class _HomePageState extends State<HomePage> {
             horario: dados["horario"],
             tipo: dados["tipo"],
             data: dados["data"] ?? '',
+            repeticao: dados["repeticao"] ?? 'Nunca',
           );
         }).toList();
       });
@@ -123,6 +126,7 @@ class _HomePageState extends State<HomePage> {
               : '${_dataSelecionada!.day.toString().padLeft(2, '0')}/'
                 '${_dataSelecionada!.month.toString().padLeft(2, '0')}/'
                 '${_dataSelecionada!.year}',
+            repeticao: _repeticaoSelecionada,
           ),
         );
       } else {
@@ -139,7 +143,8 @@ class _HomePageState extends State<HomePage> {
           : '${_dataSelecionada!.day.toString().padLeft(2, '0')}/'
             '${_dataSelecionada!.month.toString().padLeft(2, '0')}/'
             '${_dataSelecionada!.year}',
-        );
+            repeticao: _repeticaoSelecionada,
+          );
       }
     });
 
@@ -149,6 +154,7 @@ class _HomePageState extends State<HomePage> {
     _descricaoController.clear();
     _horarioSelecionado = null;
     _tipoSelecionado = 'Outro';
+    _repeticaoSelecionada = 'Nunca';
 
     Navigator.pop(context);
   }
@@ -492,6 +498,66 @@ class _HomePageState extends State<HomePage> {
                     ),
 
                     const SizedBox(height: 25),
+
+                    /// REPETIÇÃO
+                    const Text(
+                      'Repetir?',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    Container(
+                      width: double.infinity,
+
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _repeticaoSelecionada,
+
+                          items: const [
+
+                            DropdownMenuItem(
+                              value: 'Nunca',
+                              child: Text('Nunca'),
+                            ),
+
+                            DropdownMenuItem(
+                              value: 'Diariamente',
+                              child: Text('Diariamente'),
+                            ),
+
+                            DropdownMenuItem(
+                              value: 'Semanalmente',
+                              child: Text('Semanalmente'),
+                            ),
+
+                            DropdownMenuItem(
+                              value: 'Mensalmente',
+                              child: Text('Mensalmente'),
+                            ),
+                          ],
+
+                          onChanged: (value) {
+                            modalSetState(() {
+                              _repeticaoSelecionada = value!;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
 
                     /// TIPO
                     const Text(
