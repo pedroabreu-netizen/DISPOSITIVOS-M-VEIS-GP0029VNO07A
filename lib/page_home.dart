@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 //import 'page_login.dart';
 //import 'page_perfil.dart';
 import 'tarefa.dart';
@@ -14,7 +16,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Tarefa> _itens = [
-    Tarefa(
+   /* Tarefa(
       titulo: 'Tomar remédio para pressão',
       descricao: '1 comprimido após café da manhã',
       concluida: false,
@@ -34,7 +36,7 @@ class _HomePageState extends State<HomePage> {
       concluida: false,
       horario: '12:00',
       tipo: 'Familia',
-    ),
+    ),*/
   ];
 
   final TextEditingController _tituloController =
@@ -45,7 +47,7 @@ class _HomePageState extends State<HomePage> {
 
   static const String chaveTarefas = "lista_tarefas";
 
-  bool _modoBusca = false;
+  //bool _modoBusca = false;
 
   final TextEditingController _buscaController =
       TextEditingController();
@@ -65,6 +67,9 @@ class _HomePageState extends State<HomePage> {
       });
     });
   }
+
+  String _tipoSelecionado = 'Outro';
+  TimeOfDay? _horarioSelecionado;
 
   Future<void> _salvarNoStorage() async {
     final prefs = await SharedPreferences.getInstance();
@@ -106,37 +111,17 @@ class _HomePageState extends State<HomePage> {
         }).toList();
       });
     } else {
-      _itens = [
-        Tarefa(
-          titulo: 'Flutter',
-          descricao: 'Tarefa de Flutter',
-          concluida: false,
-          horario: '10:00',
-          tipo: 'Médico',
-        ),
-        Tarefa(
-          titulo: 'Dart',
-          descricao: 'Prática de Dart',
-          concluida: false,
-          horario: '11:00',
-          tipo: 'Remédio',  
-        ),
-        Tarefa(
-          titulo: 'Projeto',
-          descricao: 'Projeto Integrador',
-          concluida: false,
-          horario: '12:00',
-          tipo: 'Familia',
-        ),
-      ];
+      _itens = [];
 
       _salvarNoStorage();
     }
   }
 
+
   void _salvarTarefa(int? index) async {
     if (_tituloController.text.isEmpty ||
-        _descricaoController.text.isEmpty) {
+        _descricaoController.text.isEmpty || 
+        _tipoSelecionado.isEmpty) {
       return;
     }
 
@@ -147,9 +132,10 @@ class _HomePageState extends State<HomePage> {
             titulo: _tituloController.text,
             descricao: _descricaoController.text,
             concluida: false,
-            horario: '00:00',
-  
-            tipo: 'Outro',
+            horario: _horarioSelecionado == null
+                ? '00:00'
+                : _horarioSelecionado!.format(context),
+            tipo: _tipoSelecionado,
           ),
         );
       } else {
@@ -157,8 +143,10 @@ class _HomePageState extends State<HomePage> {
           titulo: _tituloController.text,
           descricao: _descricaoController.text,
           concluida: _itens[index].concluida,
-          horario: _itens[index].horario,
-          tipo: _itens[index].tipo,
+       horario: _horarioSelecionado == null
+          ? _itens[index].horario
+          : _horarioSelecionado!.format(context),
+        tipo: _tipoSelecionado,
         );
       }
     });
@@ -167,75 +155,178 @@ class _HomePageState extends State<HomePage> {
 
     _tituloController.clear();
     _descricaoController.clear();
+    _horarioSelecionado = null;
+    _tipoSelecionado = 'Outro';
 
     Navigator.pop(context);
   }
 
   void _excluirTarefa(int index) async {
-    setState(() {
-      _itens.removeAt(index);
-    });
-
-    await _salvarNoStorage();
-  }
-
-  void _mostrarFormulario([int? index]) {
-    if (index != null) {
-      _tituloController.text = _itens[index].titulo;
-      _descricaoController.text =
-          _itens[index].descricao;
-    } else {
-      _tituloController.clear();
-      _descricaoController.clear();
-    }
-
-    showDialog(
+    final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          index == null
-              ? 'Nova Tarefa'
-              : 'Editar Tarefa',
+        title: const Text('Confirmar exclusão', 
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _tituloController,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Título',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 15),
-              TextField(
-                controller: _descricaoController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Descrição',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
+        content: const Text(
+          'Tem certeza que deseja excluir esta tarefa?',
+          style: TextStyle(fontSize: 20),
         ),
         actions: [
           TextButton(
             onPressed: () =>
-                Navigator.pop(context),
+                Navigator.pop(context, false),
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () =>
-                _salvarTarefa(index),
-            child: const Text('Salvar'),
+                Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              textStyle: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            child: const Text('Apagar'),
           ),
         ],
       ),
     );
+    if (confirmar == true) {
+        setState(() {
+          _itens.removeAt(index);
+        });
+
+        await _salvarNoStorage();
+      }
+    }
+
+  void _mostrarFormulario([int? index]) {
+    if (index != null) {
+      _tituloController.text = _itens[index].titulo;
+      _descricaoController.text =_itens[index].descricao;
+      _horarioSelecionado = TimeOfDay(
+        hour: int.parse(_itens[index].horario.split(':')[0]),
+        minute: int.parse(_itens[index].horario.split(':')[1]),
+      );
+      _tipoSelecionado = _itens[index].tipo;
+    } else {
+      _tituloController.clear();
+      _descricaoController.clear();
+      _horarioSelecionado = null;
+      _tipoSelecionado = 'Outro';
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(25),
+      ),
+    ),
+
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 16,
+            right: 16,
+            top: 16,
+          ),
+
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Nova Tarefa",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              TextField(
+                controller: _tituloController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'O que é?',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              TextField(
+                controller: _descricaoController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Detalhes (opcional)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              DropdownButton<String>(
+                value: _tipoSelecionado,
+                onChanged: (value) {
+                  setState(() {
+                    _tipoSelecionado = value!;
+                  });
+                },
+                items: const [
+                  DropdownMenuItem(value: "Remédio", child: Text("Remédio")),
+                  DropdownMenuItem(value: "Médico", child: Text("Médico")),
+                  DropdownMenuItem(value: "Família", child: Text("Família")),
+                  DropdownMenuItem(value: "Pessoal", child: Text("Pessoal")),
+                  DropdownMenuItem(value: "Outro", child: Text("Outro")),
+                ],
+              ),
+
+              const SizedBox(height: 15),
+
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final hora = await showTimePicker(
+                    context: context,
+                    initialTime:
+                        _horarioSelecionado ??
+                        TimeOfDay.now(),
+                  );
+
+                  if (hora != null) {
+                    setState(() {
+                      _horarioSelecionado = hora;
+                    });
+                  }
+                },
+                icon: const Icon(Icons.access_time),
+                label: Text(
+                  _horarioSelecionado == null
+                      ? 'Selecionar horário'
+                      : _horarioSelecionado!
+                          .format(context),
+                ),
+              ),
+
+              const SizedBox(height: 25),
+
+              ElevatedButton(
+                onPressed: () => _salvarTarefa(index),
+                child: const Text("Salvar Tarefa"),
+              ),
+            ],
+          ),
+        )
+        );
+      },
+    );
   }
+
+  String dataFormatada = DateFormat("EEEE d 'de' MMMM", 'pt_BR').format(DateTime.now());
 
   @override
   Widget build(BuildContext context) {
@@ -244,6 +335,14 @@ class _HomePageState extends State<HomePage> {
           .toLowerCase()
           .contains(_textoBusca);
     }).toList();
+
+    final concluidasHoje = tarefasFiltradas
+    .where((tarefa) => tarefa.concluida)
+    .length;
+
+    final pendentes = tarefasFiltradas
+        .where((tarefa) => !tarefa.concluida)
+        .length;
 
     return Scaffold(
       appBar: AppBar(
@@ -299,11 +398,15 @@ class _HomePageState extends State<HomePage> {
         flexibleSpace: Container(
           padding: EdgeInsets.fromLTRB(20, 22, 20, 20),
           decoration: BoxDecoration(
-            color: Color.fromARGB(255, 74, 212, 136),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(25),
-              bottomRight: Radius.circular(25),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors:[ 
+               Color(0xFF62C982),
+               Color(0xFF23D7CC)
+              ]
             ),
+
           ),
 
           child: Column(
@@ -321,7 +424,7 @@ class _HomePageState extends State<HomePage> {
               SizedBox(height: 5),
 
               Text(
-                'Quarta-feira, 18 de Março',
+                dataFormatada,
                 style: TextStyle(color: Colors.white70),
               ),
 
@@ -337,15 +440,15 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Column(
                     children: [
-                      Text('0',
-                        style:TextStyle(fontSize: 30, 
+                      Text('$concluidasHoje',
+                        style:TextStyle(fontSize: 35, 
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         )
                       ),
                       Text('Concluídas hoje',
                           style: TextStyle(color: Colors.white,
-                          fontWeight: FontWeight.bold,)
+                          fontWeight: FontWeight.bold, fontSize: 15)
                         ),
                     ],
                   ),
@@ -354,15 +457,15 @@ class _HomePageState extends State<HomePage> {
 
                   Column(
                     children: [
-                      Text('4',
+                      Text('$pendentes',
                           style:
-                              TextStyle(fontSize: 30, 
+                              TextStyle(fontSize: 35, 
                               color: Colors.orange,
                               fontWeight: FontWeight.bold,)
                           ),
                       Text('Pendentes',
                           style: TextStyle(color: Colors.white,
-                          fontWeight: FontWeight.bold,)
+                          fontWeight: FontWeight.bold, fontSize: 15)
                         ),
                     ],
                   ),
@@ -419,77 +522,159 @@ class _HomePageState extends State<HomePage> {
 
                 SizedBox(height: 20);
 
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                    'Para fazer hoje',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25,
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (index == 0)
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                      child: Text(
+                        'Para fazer hoje',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 25,
+                        ),
+                      ),
                     ),
-                  ),
-                );
-
-                return Card(
+                Card(
                   margin:
                       const EdgeInsets.symmetric(
                     horizontal: 15,
                     vertical: 6,
                   ),
-                  child: ListTile(
-                    title: Text(
-                      tarefa.titulo,
-                      style: const TextStyle(
-                        fontWeight:
-                            FontWeight.bold,
-                      ),
-                    ),
-                    subtitle:
-                        Text(tarefa.descricao),
-                    trailing: Row(
-                      mainAxisSize:
-                          MainAxisSize.min,
-                      children: [
-                        Checkbox(
-                          value: tarefa.concluida,
-                          onChanged:
-                              (value) async {
-                            setState(() {
-                              _itens[indexOriginal]
-                                      .concluida =
-                                  value ??
-                                      false;
-                            });
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
 
-                            await _salvarNoStorage();
-                          },
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Transform.scale(
+                            scale: 1.5,
+                            child: Checkbox(
+                              value: tarefa.concluida,
+                              onChanged: (value) async {
+                                setState(() {
+                                  _itens[indexOriginal].concluida =
+                                      value ?? false;
+                                });
+                                await _salvarNoStorage();
+                              },
+                              shape: CircleBorder(),
+                              activeColor: Colors.green,
+                              checkColor: Colors.white, 
+                            ),
+                          ),
+                          
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  tarefa.titulo,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 4),
+
+                                Text(
+                                  tarefa.descricao,
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          IconButton(
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: Colors.grey,
+                              size: 35,
+                            ),
+                            onPressed: () =>
+                                _excluirTarefa(indexOriginal),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      Padding(
+                        padding: const EdgeInsets.only(left: 50),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withOpacity(0.2),
+                                borderRadius:
+                                    BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                tarefa.tipo,
+                                style: const TextStyle(
+                                  color: Colors.orange,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(width: 10),
+
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                borderRadius:
+                                    BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.access_time,
+                                    size: 16,
+                                    color: Colors.grey,
+                                  ),
+
+                                  const SizedBox(width: 4),
+
+                                  Text(
+                                    tarefa.horario,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.edit,
-                            color: Colors.blue,
-                          ),
-                          onPressed: () =>
-                              _mostrarFormulario(
-                            indexOriginal,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.delete,
-                            color: Color.fromARGB(255, 131, 129, 129),
-                          ),
-                          onPressed: () =>
-                              _excluirTarefa(
-                            indexOriginal,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                );
-              },
-            ),
+                ),
+                ),
+                ],
+              );
+            },
+          ),
       floatingActionButton: Container(
         padding: EdgeInsets.only(bottom: 10),
         child: Align(
@@ -499,7 +684,7 @@ class _HomePageState extends State<HomePage> {
             _mostrarFormulario(),
             icon: const Icon(Icons.add),
             label: const Text(' Adicionar tarefa',
-              style: TextStyle(fontSize: 24),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             backgroundColor: const Color.fromARGB(255, 62, 172, 111),
             foregroundColor: Colors.white,
