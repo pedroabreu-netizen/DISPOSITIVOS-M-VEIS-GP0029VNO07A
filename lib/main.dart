@@ -1,3 +1,4 @@
+import 'package:dispositivos_moveis_gp0029vno07a/page_notas.dart';
 import 'package:flutter/material.dart';
 import 'page_login.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -12,8 +13,9 @@ class MeuApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      
       debugShowCheckedModeBanner: false,
-
+      
       locale: const Locale('pt', 'BR'),
 
       localizationsDelegates: const [
@@ -26,7 +28,14 @@ class MeuApp extends StatelessWidget {
         Locale('pt', 'BR'),
       ],
       
-      home: const LoginPage(),
+      
+      title: 'Flutter Demo',
+      theme: ThemeData(
+
+        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+      ),
+      
+       home: const LoginPage(),
     );
   }
 }
