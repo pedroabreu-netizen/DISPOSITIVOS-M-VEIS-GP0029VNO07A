@@ -445,7 +445,14 @@ class _PageNotasState extends State<PageNotas> {
         flexibleSpace: Container(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
           decoration: const BoxDecoration(
-            color: Color.fromARGB(255, 75, 202, 132),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF62C982),
+                Color(0xFF23D7CC),
+              ],
+            ),
           ),
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
