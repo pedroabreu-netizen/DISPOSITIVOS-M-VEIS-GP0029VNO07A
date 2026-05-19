@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
   shared_preferences: ^2.2.3
   cupertino_icons: ^1.0.8
+  shared_preferences: ^2.5.5
+  table_calendar: ^3.2.0
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
