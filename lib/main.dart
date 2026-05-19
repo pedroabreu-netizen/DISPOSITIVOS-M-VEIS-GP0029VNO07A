@@ -12,13 +12,20 @@ class MeuApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      supportedLocales: [const Locale('pt', 'BR')],
+      debugShowCheckedModeBanner: false,
+
+      locale: const Locale('pt', 'BR'),
+
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
-    ],
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(primaryColor: Colors.lightBlueAccent),
+        GlobalCupertinoLocalizations.delegate,
+      ],
+
+      supportedLocales: const [
+        Locale('pt', 'BR'),
+      ],
+      
       home: const LoginPage(),
     );
   }

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-//import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 //import 'page_login.dart';
@@ -15,29 +14,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Tarefa> _itens = [
-   /* Tarefa(
-      titulo: 'Tomar remédio para pressão',
-      descricao: '1 comprimido após café da manhã',
-      concluida: false,
-      horario: '10:00',
-      tipo: 'Remédio',
-    ),
-    Tarefa(
-      titulo: 'Consulta ocm Dr. Silva',
-      descricao: 'Rua das flores, 123 - clinica São José',
-      concluida: false,
-      horario: '11:00',
-      tipo: 'Médico',
-    ),
-    Tarefa(
-      titulo: 'Projeto',
-      descricao: 'Projeto Integrador',
-      concluida: false,
-      horario: '12:00',
-      tipo: 'Familia',
-    ),*/
-  ];
+  List<Tarefa> _itens = [];
 
   final TextEditingController _tituloController =
       TextEditingController();
@@ -71,6 +48,8 @@ class _HomePageState extends State<HomePage> {
   String _tipoSelecionado = 'Outro';
   TimeOfDay? _horarioSelecionado;
 
+  DateTime? _dataSelecionada;
+
   Future<void> _salvarNoStorage() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -81,6 +60,7 @@ class _HomePageState extends State<HomePage> {
         "concluida": tarefa.concluida,
         "horario": tarefa.horario,
         "tipo": tarefa.tipo,
+        "data": tarefa.data,
       });
     }).toList();
 
@@ -91,6 +71,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _carregarTarefas() async {
+
+    
     final prefs = await SharedPreferences.getInstance();
 
     List<String>? tarefasSalvas =
@@ -107,6 +89,7 @@ class _HomePageState extends State<HomePage> {
             concluida: dados["concluida"],
             horario: dados["horario"],
             tipo: dados["tipo"],
+            data: dados["data"] ?? '',
           );
         }).toList();
       });
@@ -116,7 +99,6 @@ class _HomePageState extends State<HomePage> {
       _salvarNoStorage();
     }
   }
-
 
   void _salvarTarefa(int? index) async {
     if (_tituloController.text.isEmpty ||
@@ -136,6 +118,11 @@ class _HomePageState extends State<HomePage> {
                 ? '00:00'
                 : _horarioSelecionado!.format(context),
             tipo: _tipoSelecionado,
+            data: _dataSelecionada == null
+              ? ''
+              : '${_dataSelecionada!.day.toString().padLeft(2, '0')}/'
+                '${_dataSelecionada!.month.toString().padLeft(2, '0')}/'
+                '${_dataSelecionada!.year}',
           ),
         );
       } else {
@@ -147,6 +134,11 @@ class _HomePageState extends State<HomePage> {
           ? _itens[index].horario
           : _horarioSelecionado!.format(context),
         tipo: _tipoSelecionado,
+        data: _dataSelecionada == null
+          ? _itens[index].data
+          : '${_dataSelecionada!.day.toString().padLeft(2, '0')}/'
+            '${_dataSelecionada!.month.toString().padLeft(2, '0')}/'
+            '${_dataSelecionada!.year}',
         );
       }
     });
@@ -202,127 +194,453 @@ class _HomePageState extends State<HomePage> {
       }
     }
 
-  void _mostrarFormulario([int? index]) {
+    void _mostrarFormulario([int? index]) {
     if (index != null) {
       _tituloController.text = _itens[index].titulo;
-      _descricaoController.text =_itens[index].descricao;
-      _horarioSelecionado = TimeOfDay(
-        hour: int.parse(_itens[index].horario.split(':')[0]),
-        minute: int.parse(_itens[index].horario.split(':')[1]),
-      );
+      _descricaoController.text =
+          _itens[index].descricao;
+
       _tipoSelecionado = _itens[index].tipo;
     } else {
       _tituloController.clear();
       _descricaoController.clear();
-      _horarioSelecionado = null;
+
       _tipoSelecionado = 'Outro';
     }
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(25),
-      ),
-    ),
-
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 16,
-            right: 16,
-            top: 16,
-          ),
+        return StatefulBuilder(
+          builder: (context, modalSetState) {
+            return Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom:
+                    MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
 
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Nova Tarefa",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(30),
                 ),
               ),
 
-              TextField(
-                controller: _tituloController,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'O que é?',
-                  border: OutlineInputBorder(),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+
+                  children: [
+
+                    /// CABEÇALHO
+                    Row(
+                      mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Nova Tarefa',
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        CircleAvatar(
+                          backgroundColor:
+                              Colors.grey.shade200,
+
+                          child: IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    /// TITULO
+                    const Text(
+                      'O que é?',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    TextField(
+                      controller: _tituloController,
+
+                      decoration: InputDecoration(
+                        hintText: 'Ex: Tomar remédio',
+
+                        filled: true,
+                        fillColor: Colors.grey.shade100,
+
+                        border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(15),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    /// DESCRIÇÃO
+                    const Text(
+                      'Detalhes (opcional)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    TextField(
+                      controller: _descricaoController,
+                      maxLines: 3,
+
+                      decoration: InputDecoration(
+                        hintText:
+                            'Adicione informações extras aqui...',
+
+                        filled: true,
+                        fillColor: Colors.grey.shade100,
+
+                        border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(15),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    /// DATA E HORA
+                    Row(
+                      children: [
+
+                        /// DATA
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start,
+
+                            children: [
+                              const Text(
+                                'Data',
+                                style: TextStyle(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
+                              ),
+
+                              const SizedBox(height: 8),
+
+                              GestureDetector(
+                                onTap: () async {
+
+                                  final data = await showDatePicker(
+                                    context: context,
+
+                                    initialDate:
+                                        _dataSelecionada ?? DateTime.now(),
+
+                                    firstDate: DateTime(2020),
+
+                                    lastDate: DateTime(2030),
+                                  );
+
+                                  if (data != null) {
+                                    modalSetState(() {
+                                      _dataSelecionada = data;
+                                    });
+                                  }
+                                },
+
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 15,
+                                    vertical: 15,
+                                  ),
+
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade100,
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+
+                                    children: [
+
+                                      Text(
+                                        _dataSelecionada == null
+                                            ? 'Selecionar'
+                                            : '${_dataSelecionada!.day.toString().padLeft(2, '0')}/'
+                                              '${_dataSelecionada!.month.toString().padLeft(2, '0')}/'
+                                              '${_dataSelecionada!.year}',
+                                      ),
+
+                                      const Icon(
+                                        Icons.calendar_today,
+                                        size: 18,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(width: 15),
+
+                        /// HORA
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start,
+
+                            children: [
+                              const Text(
+                                'Hora',
+                                style: TextStyle(
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
+                              ),
+
+                              const SizedBox(height: 8),
+
+                              GestureDetector(
+                                onTap: () async {
+
+                                  final hora =
+                                      await showTimePicker(
+                                    context: context,
+                                    initialTime:
+                                        TimeOfDay.now(),
+                                  );
+
+                                  if (hora != null) {
+                                    modalSetState(() {
+                                      _horarioSelecionado =
+                                          hora;
+                                    });
+                                  }
+                                },
+
+                                child: Container(
+                                  padding:
+                                      const EdgeInsets.symmetric(
+                                    horizontal: 15,
+                                    vertical: 15,
+                                  ),
+
+                                  decoration: BoxDecoration(
+                                    color:
+                                        Colors.grey.shade100,
+
+                                    borderRadius:
+                                        BorderRadius.circular(
+                                            15),
+                                  ),
+
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment
+                                            .spaceBetween,
+
+                                    children: [
+                                      Text(
+                                        _horarioSelecionado ==
+                                                null
+                                            ? '--:--'
+                                            : _horarioSelecionado!
+                                                .format(
+                                                    context),
+                                      ),
+
+                                      const Icon(
+                                        Icons.access_time,
+                                        size: 18,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    /// TIPO
+                    const Text(
+                      'Tipo',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+
+                      children: [
+
+                        _buildTipoButton(
+                          'Remédio',
+                          '💊',
+                          modalSetState,
+                        ),
+
+                        _buildTipoButton(
+                          'Médico',
+                          '🩺',
+                          modalSetState,
+                        ),
+
+                        _buildTipoButton(
+                          'Família',
+                          '❤️',
+                          modalSetState,
+                        ),
+
+                        _buildTipoButton(
+                          'Pessoal',
+                          '😊',
+                          modalSetState,
+                        ),
+
+                        _buildTipoButton(
+                          'Outro',
+                          '✨',
+                          modalSetState,
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 35),
+
+                    /// BOTÃO SALVAR
+                    SizedBox(
+                      width: double.infinity,
+
+                      height: 60,
+
+                      child: ElevatedButton(
+                        onPressed: () =>
+                            _salvarTarefa(index),
+
+                        style:
+                            ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Colors.green,
+
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(
+                                    18),
+                          ),
+                        ),
+
+                        child: const Text(
+                          'Salvar Tarefa',
+
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-
-              const SizedBox(height: 15),
-
-              TextField(
-                controller: _descricaoController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Detalhes (opcional)',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-
-              const SizedBox(height: 15),
-
-              DropdownButton<String>(
-                value: _tipoSelecionado,
-                onChanged: (value) {
-                  setState(() {
-                    _tipoSelecionado = value!;
-                  });
-                },
-                items: const [
-                  DropdownMenuItem(value: "Remédio", child: Text("Remédio")),
-                  DropdownMenuItem(value: "Médico", child: Text("Médico")),
-                  DropdownMenuItem(value: "Família", child: Text("Família")),
-                  DropdownMenuItem(value: "Pessoal", child: Text("Pessoal")),
-                  DropdownMenuItem(value: "Outro", child: Text("Outro")),
-                ],
-              ),
-
-              const SizedBox(height: 15),
-
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final hora = await showTimePicker(
-                    context: context,
-                    initialTime:
-                        _horarioSelecionado ??
-                        TimeOfDay.now(),
-                  );
-
-                  if (hora != null) {
-                    setState(() {
-                      _horarioSelecionado = hora;
-                    });
-                  }
-                },
-                icon: const Icon(Icons.access_time),
-                label: Text(
-                  _horarioSelecionado == null
-                      ? 'Selecionar horário'
-                      : _horarioSelecionado!
-                          .format(context),
-                ),
-              ),
-
-              const SizedBox(height: 25),
-
-              ElevatedButton(
-                onPressed: () => _salvarTarefa(index),
-                child: const Text("Salvar Tarefa"),
-              ),
-            ],
-          ),
-        )
+            );
+          },
         );
       },
+    );
+  }
+
+  Widget _buildTipoButton(
+    String tipo,
+    String emoji,
+    Function modalSetState,
+  ) {
+    final selecionado =
+        _tipoSelecionado == tipo;
+
+    return GestureDetector(
+      onTap: () {
+        modalSetState(() {
+          _tipoSelecionado = tipo;
+        });
+      },
+
+      child: Container(
+        width: 90,
+        padding: const EdgeInsets.symmetric(
+          vertical: 12,
+        ),
+
+        decoration: BoxDecoration(
+          color: selecionado
+              ? Colors.blue.shade50
+              : Colors.grey.shade100,
+
+          borderRadius:
+              BorderRadius.circular(15),
+
+          border: Border.all(
+            color: selecionado
+                ? Colors.blue
+                : Colors.grey.shade300,
+          ),
+        ),
+
+        child: Column(
+          children: [
+            Text(
+              emoji,
+              style: const TextStyle(fontSize: 24),
+            ),
+
+            const SizedBox(height: 5),
+
+            Text(
+              tipo,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -330,19 +648,30 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final tarefasFiltradas = _itens.where((tarefa) {
-      return tarefa.titulo
-          .toLowerCase()
-          .contains(_textoBusca);
-    }).toList();
+  final hoje =
+      '${DateTime.now().day.toString().padLeft(2, '0')}/'
+      '${DateTime.now().month.toString().padLeft(2, '0')}/'
+      '${DateTime.now().year}';
 
-    final concluidasHoje = tarefasFiltradas
+  final tarefasFiltradas = _itens.where((tarefa) {
+
+    final mesmaData = tarefa.data == hoje;
+
+    final mesmaBusca = tarefa.titulo
+        .toLowerCase()
+        .contains(_textoBusca);
+
+    return mesmaData && mesmaBusca;
+
+  }).toList();
+
+  final concluidasHoje = tarefasFiltradas
     .where((tarefa) => tarefa.concluida)
     .length;
 
-    final pendentes = tarefasFiltradas
-        .where((tarefa) => !tarefa.concluida)
-        .length;
+  final pendentes = tarefasFiltradas
+    .where((tarefa) => !tarefa.concluida)
+    .length;
 
     return Scaffold(
       appBar: AppBar(
@@ -476,34 +805,6 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       ),
-      /*drawer: Drawer(
-        child: ListView(
-          children: [
-            const DrawerHeader(
-              decoration:
-                  BoxDecoration(color: Colors.blue),
-              child: Text(
-                'Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('Meu Perfil'),
-              /*onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      const PerfilPage(),
-                ),
-              ),*/
-            ),
-          ],
-        ),
-      ),*/
       body: tarefasFiltradas.isEmpty
           ? const Center(
               child: Text(
@@ -676,7 +977,7 @@ class _HomePageState extends State<HomePage> {
             },
           ),
       floatingActionButton: Container(
-        padding: EdgeInsets.only(bottom: 10),
+        padding: EdgeInsets.only(bottom: 15),
         child: Align(
           alignment: Alignment.bottomCenter,
           child: FloatingActionButton.extended(
