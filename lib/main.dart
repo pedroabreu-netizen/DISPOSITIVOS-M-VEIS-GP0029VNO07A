@@ -1,6 +1,6 @@
-import 'package:dispositivos_moveis_gp0029vno07a/page_notas.dart';
+//import 'package:dispositivos_moveis_gp0029vno07a/page_notas.dart';
 import 'package:flutter/material.dart';
-import 'page_login.dart';
+import 'page_home.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
@@ -35,7 +35,7 @@ class MeuApp extends StatelessWidget {
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
       
-       home: const LoginPage(),
+       home: const HomePage(),
     );
   }
 }

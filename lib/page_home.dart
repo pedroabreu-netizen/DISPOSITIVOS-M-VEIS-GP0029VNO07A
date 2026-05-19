@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 //import 'page_login.dart';
 //import 'page_perfil.dart';
 import 'tarefa.dart';
+import 'widgets/nav_bar.dart';
+import 'navigation/nav_index.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -1059,7 +1061,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
 
-      bottomNavigationBar:
+      /*bottomNavigationBar:
         BottomNavigationBar(
         currentIndex: 0,
         items: const [
@@ -1091,6 +1093,10 @@ class _HomePageState extends State<HomePage> {
             );*/
           }
         },
+      ),*/
+      bottomNavigationBar: NavBar(
+        currentIndex: 0,
+        onTap: (index) => navigateByIndex(context, 0, index),
       ),
     );
   }
