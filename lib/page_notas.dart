@@ -601,13 +601,21 @@ class _PageNotasState extends State<PageNotas> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _mostrarFormulario(),
+      floatingActionButton: Container(
+        padding: EdgeInsets.only(bottom: 15),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: FloatingActionButton.extended(
+            onPressed: () => _mostrarFormulario(), 
+            label: const Text(' Adicionar Nota', style: TextStyle(fontSize: 24) ,),
+             icon: Icon(Icons.add),          
         backgroundColor: const Color.fromARGB(255, 62, 172, 111),
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add),
-        label: const Text('Adicionar nota'),
+        foregroundColor: Colors.white,),
+        
+        ),
+
       ),
+  
       bottomNavigationBar: NavBar(
         currentIndex: 2,
         onTap: (index) => navigateByIndex(context, 2, index),
