@@ -179,130 +179,244 @@ class _PageNotasState extends State<PageNotas> {
       _selectedDate = null;
     }
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(index == null ? 'Nova Nota' : 'Editar Nota'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: _tituloController,
-                  autofocus: true,
-                  decoration: const InputDecoration(hintText: 'Título da nota'),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _descricaoController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(hintText: 'Descrição'),
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Categorias',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  children: _categorias.map((cat) {
-                    final selected = _selectedCategorias.contains(cat);
-                    return FilterChip(
-                      label: Text(cat),
-                      selected: selected,
-                      onSelected: (v) {
-                        setState(() {
-                          if (v) {
-                            _selectedCategorias.add(cat);
-                          } else {
-                            _selectedCategorias.remove(cat);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Data',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: _selectedDate ?? DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    );
-                    if (picked != null) {
-                      setState(() {
-                        _selectedDate = picked;
-                        _dataController.text = _formatDate(picked);
-                      });
-                    }
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 12,
-                      horizontal: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Row(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, modalSetState) {
+            return Container(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    /// CABEÇALHO
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          _dataController.text.isEmpty
-                              ? 'Selecionar data'
-                              : _dataController.text,
-                          style: TextStyle(
-                            color: _dataController.text.isEmpty
-                                ? Colors.grey
-                                : Colors.black,
+                          index == null ? 'Nova Nota' : 'Editar Nota',
+                          style: const TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const Icon(Icons.calendar_today, size: 18),
+                        CircleAvatar(
+                          backgroundColor: Colors.grey.shade200,
+                          child: IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              _tituloController.clear();
+                              _descricaoController.clear();
+                              _tagsController.clear();
+                              _dataController.clear();
+                              _selectedCategorias.clear();
+                              _selectedDate = null;
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ),
                       ],
                     ),
-                  ),
+                    const SizedBox(height: 25),
+
+                    /// TÍTULO
+                    const Text(
+                      'Título',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _tituloController,
+                      decoration: InputDecoration(
+                        hintText: 'Ex: Lista de Remédios',
+                        filled: true,
+                        fillColor: Colors.grey.shade100,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    /// CONTEÚDO
+                    const Text(
+                      'Conteúdo',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _descricaoController,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: 'Escreva sua anotação aqui...',
+                        filled: true,
+                        fillColor: Colors.grey.shade100,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 25),
+
+                    /// DATA
+                    const Text(
+                      'Data',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    GestureDetector(
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _selectedDate ?? DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          modalSetState(() {
+                            _selectedDate = picked;
+                            _dataController.text = _formatDate(picked);
+                          });
+                        }
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 15,
+                          vertical: 15,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              _dataController.text.isEmpty
+                                  ? 'Selecionar data'
+                                  : _dataController.text,
+                              style: TextStyle(
+                                color: _dataController.text.isEmpty
+                                    ? Colors.grey
+                                    : Colors.black,
+                              ),
+                            ),
+                            const Icon(Icons.calendar_today, size: 18),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 25),
+
+                    /// CATEGORIAS
+                    const Text(
+                      'Categorias',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: _categorias.map((cat) {
+                        final selecionado = _selectedCategorias.contains(cat);
+                        return GestureDetector(
+                          onTap: () {
+                            modalSetState(() {
+                              if (selecionado) {
+                                _selectedCategorias.remove(cat);
+                              } else {
+                                _selectedCategorias.add(cat);
+                              }
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: selecionado
+                                  ? Colors.blue.shade50
+                                  : Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: selecionado
+                                    ? Colors.blue
+                                    : Colors.grey.shade300,
+                              ),
+                            ),
+                            child: Text(
+                              cat,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: selecionado
+                                    ? Colors.blue
+                                    : Colors.black87,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 35),
+
+                    /// BOTÃO SALVAR
+                    SizedBox(
+                      width: double.infinity,
+                      height: 60,
+                      child: ElevatedButton(
+                        onPressed: () => _salvarNota(index),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                        ),
+                        child: const Text(
+                          'Salvar Nota',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                _tituloController.clear();
-                _descricaoController.clear();
-                _tagsController.clear();
-                _dataController.clear();
-                _selectedCategorias.clear();
-                _selectedDate = null;
-                Navigator.pop(context);
-              },
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () => _salvarNota(index),
-              child: const Text('Salvar'),
-            ),
-          ],
-        ),
-      ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -331,7 +445,14 @@ class _PageNotasState extends State<PageNotas> {
         flexibleSpace: Container(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
           decoration: const BoxDecoration(
-            color: Color.fromARGB(255, 75, 202, 132),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF62C982),
+                Color(0xFF23D7CC),
+              ],
+            ),
           ),
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
