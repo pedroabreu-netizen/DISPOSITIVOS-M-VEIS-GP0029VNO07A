@@ -5,7 +5,7 @@ import 'page_login.dart';
 
 
 void main() {
-  runApp(const VivaApp());
+  runApp(const MeuApp());
 }
 
 class MeuApp extends StatelessWidget {

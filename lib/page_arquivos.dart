@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'models/arquivo_medico.dart';
+import 'navigation/nav_index.dart';
+import 'widgets/nav_bar.dart';
 
 const _kTeal = Color(0xFF5AC87D);
 
@@ -159,7 +161,10 @@ class _PageArquivosState extends State<PageArquivos> {
           ),
         ],
       ),
-      bottomNavigationBar: const _BottomNav(currentIndex: 3),
+      bottomNavigationBar: NavBar(
+        currentIndex: 3,
+        onTap: (index) => navigateByIndex(context, 3, index),
+      ),
     );
   }
 }
@@ -610,62 +615,3 @@ class _SheetCategoria extends StatelessWidget {
   }
 }
 
-// ── Barra de navegação inferior ───────────────────────────────────────────────
-// Índices: 0=Início, 1=Agenda, 2=Notas, 3=Arquivos
-
-class _BottomNav extends StatelessWidget {
-  const _BottomNav({required this.currentIndex});
-  final int currentIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: _kTeal,
-      unselectedItemColor: const Color(0xFF9E9E9E),
-      selectedLabelStyle:
-          const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-      unselectedLabelStyle: const TextStyle(fontSize: 12),
-      backgroundColor: Colors.white,
-      elevation: 8,
-      onTap: (index) {
-        if (index == currentIndex) return;
-        // TODO: descomentar conforme as páginas forem implementadas
-        switch (index) {
-          case 0:
-            // Navigator.pushReplacementNamed(context, PageHome.routeName);
-            break;
-          case 1:
-            // Navigator.pushReplacementNamed(context, PageAgenda.routeName);
-            break;
-          case 2:
-            // Navigator.pushReplacementNamed(context, PageNotas.routeName);
-            break;
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          activeIcon: Icon(Icons.home_rounded),
-          label: 'Início',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.calendar_today_outlined),
-          activeIcon: Icon(Icons.calendar_today_rounded),
-          label: 'Agenda',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.description_outlined),
-          activeIcon: Icon(Icons.description_rounded),
-          label: 'Notas',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.attach_file_rounded),
-          activeIcon: Icon(Icons.attach_file_rounded),
-          label: 'Arquivos',
-        ),
-      ],
-    );
-  }
-}
