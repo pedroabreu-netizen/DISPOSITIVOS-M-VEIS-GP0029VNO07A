@@ -1,33 +1,32 @@
 import 'package:flutter/material.dart';
 import 'page_arquivos.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'page_login.dart';
+
 
 void main() {
   runApp(const VivaApp());
 }
 
-class VivaApp extends StatelessWidget {
-  const VivaApp({super.key});
+class MeuApp extends StatelessWidget {
+  const MeuApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Viva',
       debugShowCheckedModeBanner: false,
+      locale: const Locale('pt', 'BR'),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('pt', 'BR')],
+      title: 'Viva+',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6D28D9)),
-        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF65C982)),
       ),
-      // Ponto de entrada temporário para desenvolvimento da tela de arquivos.
-      // Substituir pela rota de login quando o fluxo completo estiver pronto.
-      initialRoute: PageArquivos.routeName,
-      routes: {
-        PageArquivos.routeName: (_) => const PageArquivos(),
-        // Descomentar conforme as páginas forem implementadas:
-        // PageLogin.routeName: (_) => const PageLogin(),
-        // PageHome.routeName: (_) => const PageHome(),
-        // PageAgenda.routeName: (_) => const PageAgenda(),
-        // PageNotas.routeName: (_) => const PageNotas(),
-      },
+      home: const LoginPage(),
     );
   }
 }
