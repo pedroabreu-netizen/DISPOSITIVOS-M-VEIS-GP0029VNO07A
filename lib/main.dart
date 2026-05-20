@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'pages/page_login.dart';
+import 'page_login.dart';
 
 void main() {
   runApp(const VivaApp());
