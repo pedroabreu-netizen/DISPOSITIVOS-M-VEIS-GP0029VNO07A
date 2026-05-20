@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'models/arquivo_medico.dart';
 import 'navigation/nav_index.dart';
+import 'page_login.dart';
 import 'widgets/nav_bar.dart';
 
 const _kTeal = Color(0xFF5AC87D);
@@ -121,6 +122,17 @@ class _PageArquivosState extends State<PageArquivos> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 128,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            tooltip: 'Sair',
+            onPressed: () => Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginPage()),
+              (route) => false,
+            ),
+          ),
+        ],
         flexibleSpace: Container(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
           decoration: const BoxDecoration(

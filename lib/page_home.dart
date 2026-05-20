@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-//import 'page_login.dart';
+import 'page_login.dart';
 //import 'page_perfil.dart';
 import 'tarefa.dart';
 import 'widgets/nav_bar.dart';
@@ -791,6 +791,17 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 220,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            tooltip: 'Sair',
+            onPressed: () => Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginPage()),
+              (route) => false,
+            ),
+          ),
+        ],
 
         flexibleSpace: Container(
           padding: EdgeInsets.fromLTRB(20, 22, 20, 20),

@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'navigation/nav_index.dart';
+import 'page_login.dart';
 import 'objAux/tarefa.dart';
 import 'widgets/nav_bar.dart';
 
@@ -585,6 +586,17 @@ class _PageAgendaState extends State<PageAgenda> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 128,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            tooltip: 'Sair',
+            onPressed: () => Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginPage()),
+              (route) => false,
+            ),
+          ),
+        ],
         flexibleSpace: Container(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
           decoration: const BoxDecoration(

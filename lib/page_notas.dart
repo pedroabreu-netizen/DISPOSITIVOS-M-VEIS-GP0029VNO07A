@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'nota.dart';
 import 'navigation/nav_index.dart';
+import 'page_login.dart';
 import 'widgets/nav_bar.dart';
 
 class PageNotas extends StatefulWidget {
@@ -442,6 +443,17 @@ class _PageNotasState extends State<PageNotas> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 128,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            tooltip: 'Sair',
+            onPressed: () => Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginPage()),
+              (route) => false,
+            ),
+          ),
+        ],
         flexibleSpace: Container(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
           decoration: const BoxDecoration(

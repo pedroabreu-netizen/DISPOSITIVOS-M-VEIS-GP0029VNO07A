@@ -21,6 +21,7 @@ class _CadastroPageState extends State<CadastroPage> {
 
   PhoneCountry _selectedPhoneCountry = phoneCountries.first;
   bool esconderSenha = true;
+  String _tipoUsuario = 'idoso';
 
   @override
   void dispose() {
@@ -130,10 +131,26 @@ class _CadastroPageState extends State<CadastroPage> {
                       controller: _dataController,
                       hintText: 'DD/MM/AAAA',
                       keyboardType: TextInputType.datetime,
-                      suffixIcon: const Icon(
-                        Icons.calendar_today_outlined,
-                        size: 18,
-                        color: AppColors.mutedIcon,
+                      suffixIcon: IconButton(
+                        icon: const Icon(
+                          Icons.calendar_today_outlined,
+                          size: 18,
+                          color: AppColors.mutedIcon,
+                        ),
+                        onPressed: () async {
+                          final data = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(1900),
+                            lastDate: DateTime.now(),
+                          );
+                          if (data != null) {
+                            _dataController.text =
+                                '${data.day.toString().padLeft(2, '0')}/'
+                                '${data.month.toString().padLeft(2, '0')}/'
+                                '${data.year}';
+                          }
+                        },
                       ),
                     ),
                     const SizedBox(height: 18),
@@ -152,6 +169,98 @@ class _CadastroPageState extends State<CadastroPage> {
                         minWidth: 104,
                         minHeight: 48,
                       ),
+                    ),
+                    const SizedBox(height: 18),
+                    _label('Tipo de usuário'),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => _tipoUsuario = 'idoso'),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              decoration: BoxDecoration(
+                                color: _tipoUsuario == 'idoso'
+                                    ? AppColors.buttonBackground
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: _tipoUsuario == 'idoso'
+                                      ? AppColors.buttonBackground
+                                      : AppColors.fieldBorder,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.elderly,
+                                    color: _tipoUsuario == 'idoso'
+                                        ? Colors.white
+                                        : AppColors.mutedIcon,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Idoso / Paciente',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: _tipoUsuario == 'idoso'
+                                          ? Colors.white
+                                          : AppColors.secondaryText,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => _tipoUsuario = 'cuidador'),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              decoration: BoxDecoration(
+                                color: _tipoUsuario == 'cuidador'
+                                    ? AppColors.buttonBackground
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: _tipoUsuario == 'cuidador'
+                                      ? AppColors.buttonBackground
+                                      : AppColors.fieldBorder,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.health_and_safety,
+                                    color: _tipoUsuario == 'cuidador'
+                                        ? Colors.white
+                                        : AppColors.mutedIcon,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Cuidador',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: _tipoUsuario == 'cuidador'
+                                          ? Colors.white
+                                          : AppColors.secondaryText,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 18),
                     _label('Escolha uma senha'),
