@@ -5,7 +5,7 @@ import 'package:dispositivos_moveis_gp0029vno07a/main.dart';
 
 void main() {
   testWidgets('Mostra a tela de login', (WidgetTester tester) async {
-    await tester.pumpWidget(const VivaApp());
+    await tester.pumpWidget(const MeuApp());
 
     expect(find.text('Login'), findsOneWidget);
     expect(find.text('Continuar com Google'), findsOneWidget);

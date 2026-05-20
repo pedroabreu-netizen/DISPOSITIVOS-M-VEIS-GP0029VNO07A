@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'page_cadastro.dart';
+import 'page_home.dart';
 import 'utils/app_colors.dart';
 import 'widgets/custom_text_field.dart';
 import 'widgets/social_login_button.dart';
@@ -121,7 +122,11 @@ class _LoginPageState extends State<LoginPage> {
                       height: 64,
                       child: ElevatedButton(
                         onPressed: () {
-                          debugPrint('Entrar');
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => const HomePage(),
+                            ),
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.buttonBackground,
