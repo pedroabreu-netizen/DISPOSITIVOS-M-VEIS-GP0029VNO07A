@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'page_cadastro.dart';
 import 'page_home.dart';
+import 'page_esqueci_senha.dart';
 import 'utils/app_colors.dart';
 import 'widgets/custom_text_field.dart';
 import 'widgets/social_login_button.dart';
@@ -105,8 +106,12 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 26),
                     GestureDetector(
                       onTap: () {
-                        debugPrint('Esqueceu a senha');
-                      },
+                        Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ForgotPasswordScreen(),
+                        ),
+                      );
+                    },
                       child: const Text(
                         'Esqueceu a senha?',
                         style: TextStyle(
