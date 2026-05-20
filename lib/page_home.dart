@@ -790,25 +790,13 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 220,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            tooltip: 'Sair',
-            onPressed: () => Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const LoginPage()),
-              (route) => false,
-            ),
-          ),
-        ],
-
         flexibleSpace: Container(
           padding: EdgeInsets.fromLTRB(20, 22, 20, 20),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors:[ 
+              colors:[
                Color(0xFF62C982),
                Color(0xFF23D7CC)
               ]
@@ -830,9 +818,22 @@ class _HomePageState extends State<HomePage> {
 
               SizedBox(height: 5),
 
-              Text(
-                dataFormatada,
-                style: TextStyle(color: Colors.white70),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    dataFormatada,
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoginPage()),
+                      (route) => false,
+                    ),
+                    child: const Icon(Icons.logout, color: Colors.white, size: 20),
+                  ),
+                ],
               ),
 
               Container(
