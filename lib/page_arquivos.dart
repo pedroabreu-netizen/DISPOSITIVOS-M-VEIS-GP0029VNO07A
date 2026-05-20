@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'models/arquivo_medico.dart';
 import 'navigation/nav_index.dart';
+import 'page_login.dart';
 import 'widgets/nav_bar.dart';
 
 const _kTeal = Color(0xFF5AC87D);
@@ -117,9 +118,52 @@ class _PageArquivosState extends State<PageArquivos> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        toolbarHeight: 128,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            tooltip: 'Sair',
+            onPressed: () => Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginPage()),
+              (route) => false,
+            ),
+          ),
+        ],
+        flexibleSpace: Container(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF62C982), Color(0xFF23D7CC)],
+            ),
+          ),
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Meus Arquivos',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 5),
+              Text(
+                'Receitas, exames e documentos',
+                style: TextStyle(color: Colors.white70),
+              ),
+            ],
+          ),
+        ),
+      ),
       body: Column(
         children: [
-          const _Header(),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
@@ -164,48 +208,6 @@ class _PageArquivosState extends State<PageArquivos> {
       bottomNavigationBar: NavBar(
         currentIndex: 3,
         onTap: (index) => navigateByIndex(context, 3, index),
-      ),
-    );
-  }
-}
-
-// ── Cabeçalho teal ────────────────────────────────────────────────────────────
-
-class _Header extends StatelessWidget {
-  const _Header();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF2DC7B0), Color(0xFF4DD9BC)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Meus Arquivos',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Receitas, exames e documentos',
-            style: TextStyle(
-              fontSize: 15,
-              color: Colors.white.withValues(alpha: 0.9),
-            ),
-          ),
-        ],
       ),
     );
   }
