@@ -179,12 +179,11 @@ class _HomePageState extends State<HomePage> {
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-            onPressed: () =>
-                Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
               textStyle: const TextStyle(
-                color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
