@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'page_arquivos.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
 import 'page_login.dart';
 
+
 void main() {
-  runApp(const MeuApp());
+  runApp(const VivaApp());
 }
 
 class MeuApp extends StatelessWidget {
