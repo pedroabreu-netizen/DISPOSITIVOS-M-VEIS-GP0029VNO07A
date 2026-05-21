@@ -220,7 +220,8 @@ class _CadastroPageState extends State<CadastroPage> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: GestureDetector(
-                            onTap: () => setState(() => _tipoUsuario = 'cuidador'),
+                            onTap: () =>
+                                setState(() => _tipoUsuario = 'cuidador'),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 150),
                               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -286,29 +287,38 @@ class _CadastroPageState extends State<CadastroPage> {
                     ),
                     const SizedBox(height: 22),
                     SizedBox(
-                      height: 52,
+                      height: 56,
                       child: ElevatedButton(
                         onPressed: () {
                           debugPrint('Cadastrar');
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.buttonBackground,
+                          foregroundColor: AppColors.buttonText,
+                          shadowColor: AppColors.buttonBackground.withValues(
+                            alpha: 0.35,
+                          ),
+                          surfaceTintColor: Colors.transparent,
+                          padding: const EdgeInsets.symmetric(horizontal: 18),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: const BorderSide(
-                              color: AppColors.buttonBorder,
-                              width: 2,
-                            ),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          elevation: 2,
+                          elevation: 3,
                         ),
-                        child: const Text(
-                          'Cadastrar',
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.buttonText,
-                          ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.person_add_alt_1, size: 22),
+                            SizedBox(width: 10),
+                            Text(
+                              'Cadastrar',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),

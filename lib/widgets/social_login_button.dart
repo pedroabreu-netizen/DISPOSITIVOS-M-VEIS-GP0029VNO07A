@@ -15,6 +15,7 @@ class SocialLoginButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
           side: const BorderSide(color: AppColors.fieldBorder, width: 1.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
@@ -31,13 +32,19 @@ class SocialLoginButton extends StatelessWidget {
               filterQuality: FilterQuality.high,
               excludeFromSemantics: true,
             ),
-            const SizedBox(width: 18),
-            const Text(
-              'Continuar com Google',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppColors.fieldText,
+            const SizedBox(width: 12),
+            const Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  'Continuar com Google',
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.fieldText,
+                  ),
+                ),
               ),
             ),
           ],

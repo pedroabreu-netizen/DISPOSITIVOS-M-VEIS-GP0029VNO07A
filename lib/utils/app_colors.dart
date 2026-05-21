@@ -11,7 +11,6 @@ class AppColors {
   static const secondaryText = Color(0xFF6B7280);
   static const link = Color(0xFF4F7FEF);
   static const buttonBackground = Color(0xFF65C982);
-  static const buttonBorder = Color(0xFF315CFF);
   static const fieldBorder = Color(0xFFE5E7EB);
   static const fieldText = Color(0xFF202124);
   static const mutedIcon = Color(0xFF9CA3AF);
