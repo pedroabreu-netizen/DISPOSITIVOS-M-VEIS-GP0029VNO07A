@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'nota.dart';
 import 'navigation/nav_index.dart';
+import 'page_login.dart';
 import 'widgets/nav_bar.dart';
 
 class PageNotas extends StatefulWidget {
@@ -442,10 +443,28 @@ class _PageNotasState extends State<PageNotas> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 128,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            tooltip: 'Sair',
+            onPressed: () => Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginPage()),
+              (route) => false,
+            ),
+          ),
+        ],
         flexibleSpace: Container(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
           decoration: const BoxDecoration(
-            color: Color.fromARGB(255, 75, 202, 132),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF62C982),
+                Color(0xFF23D7CC),
+              ],
+            ),
           ),
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -594,13 +613,21 @@ class _PageNotasState extends State<PageNotas> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _mostrarFormulario(),
+      floatingActionButton: Container(
+        padding: EdgeInsets.only(bottom: 15),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: FloatingActionButton.extended(
+            onPressed: () => _mostrarFormulario(), 
+            label: const Text(' Adicionar Nota', style: TextStyle(fontSize: 24) ,),
+             icon: Icon(Icons.add),          
         backgroundColor: const Color.fromARGB(255, 62, 172, 111),
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add),
-        label: const Text('Adicionar nota'),
+        foregroundColor: Colors.white,),
+        
+        ),
+
       ),
+  
       bottomNavigationBar: NavBar(
         currentIndex: 2,
         onTap: (index) => navigateByIndex(context, 2, index),

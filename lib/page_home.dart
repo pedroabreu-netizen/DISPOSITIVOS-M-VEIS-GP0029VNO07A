@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-//import 'page_login.dart';
+import 'page_login.dart';
 //import 'page_perfil.dart';
 import 'tarefa.dart';
 import 'widgets/nav_bar.dart';
@@ -179,12 +179,11 @@ class _HomePageState extends State<HomePage> {
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-            onPressed: () =>
-                Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
               textStyle: const TextStyle(
-                color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -791,14 +790,13 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 220,
-
         flexibleSpace: Container(
           padding: EdgeInsets.fromLTRB(20, 22, 20, 20),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors:[ 
+              colors:[
                Color(0xFF62C982),
                Color(0xFF23D7CC)
               ]
@@ -820,9 +818,22 @@ class _HomePageState extends State<HomePage> {
 
               SizedBox(height: 5),
 
-              Text(
-                dataFormatada,
-                style: TextStyle(color: Colors.white70),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    dataFormatada,
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoginPage()),
+                      (route) => false,
+                    ),
+                    child: const Icon(Icons.logout, color: Colors.white, size: 20),
+                  ),
+                ],
               ),
 
               Container(

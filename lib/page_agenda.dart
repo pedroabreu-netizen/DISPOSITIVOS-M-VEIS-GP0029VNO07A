@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'navigation/nav_index.dart';
+import 'page_login.dart';
 import 'objAux/tarefa.dart';
 import 'widgets/nav_bar.dart';
 
@@ -149,8 +150,7 @@ class _PageAgendaState extends State<PageAgenda> {
   void _mostrarFormulario([int? index]) {
     if (index != null) {
       _tituloController.text = _itens[index].titulo;
-      _descricaoController.text =
-          _itens[index].descricao;
+      _descricaoController.text = _itens[index].descricao;
 
       _tipoSelecionado = _itens[index].tipo;
     } else {
@@ -172,29 +172,23 @@ class _PageAgendaState extends State<PageAgenda> {
                 left: 20,
                 right: 20,
                 top: 20,
-                bottom:
-                    MediaQuery.of(context).viewInsets.bottom + 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
               ),
 
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(30),
-                ),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
               ),
 
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
 
                   children: [
-
                     /// CABEÇALHO
                     Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
                           'Nova Tarefa',
@@ -205,8 +199,7 @@ class _PageAgendaState extends State<PageAgenda> {
                         ),
 
                         CircleAvatar(
-                          backgroundColor:
-                              Colors.grey.shade200,
+                          backgroundColor: Colors.grey.shade200,
 
                           child: IconButton(
                             icon: const Icon(Icons.close),
@@ -241,8 +234,7 @@ class _PageAgendaState extends State<PageAgenda> {
                         fillColor: Colors.grey.shade100,
 
                         border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(15),
                           borderSide: BorderSide.none,
                         ),
                       ),
@@ -266,15 +258,13 @@ class _PageAgendaState extends State<PageAgenda> {
                       maxLines: 3,
 
                       decoration: InputDecoration(
-                        hintText:
-                            'Adicione informações extras aqui...',
+                        hintText: 'Adicione informações extras aqui...',
 
                         filled: true,
                         fillColor: Colors.grey.shade100,
 
                         border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(15),
                           borderSide: BorderSide.none,
                         ),
                       ),
@@ -285,27 +275,21 @@ class _PageAgendaState extends State<PageAgenda> {
                     /// DATA E HORA
                     Row(
                       children: [
-
                         /// DATA
                         Expanded(
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
 
                             children: [
                               const Text(
                                 'Data',
-                                style: TextStyle(
-                                  fontWeight:
-                                      FontWeight.bold,
-                                ),
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
 
                               const SizedBox(height: 8),
 
                               GestureDetector(
                                 onTap: () async {
-
                                   final data = await showDatePicker(
                                     context: context,
 
@@ -340,13 +324,12 @@ class _PageAgendaState extends State<PageAgenda> {
                                         MainAxisAlignment.spaceBetween,
 
                                     children: [
-
                                       Text(
                                         _dataSelecionada == null
                                             ? 'Selecionar'
                                             : '${_dataSelecionada!.day.toString().padLeft(2, '0')}/'
-                                              '${_dataSelecionada!.month.toString().padLeft(2, '0')}/'
-                                              '${_dataSelecionada!.year}',
+                                                  '${_dataSelecionada!.month.toString().padLeft(2, '0')}/'
+                                                  '${_dataSelecionada!.year}',
                                       ),
 
                                       const Icon(
@@ -366,73 +349,56 @@ class _PageAgendaState extends State<PageAgenda> {
                         /// HORA
                         Expanded(
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
 
                             children: [
                               const Text(
                                 'Hora',
-                                style: TextStyle(
-                                  fontWeight:
-                                      FontWeight.bold,
-                                ),
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
 
                               const SizedBox(height: 8),
 
                               GestureDetector(
                                 onTap: () async {
-
-                                  final hora =
-                                      await showTimePicker(
+                                  final hora = await showTimePicker(
                                     context: context,
-                                    initialTime:
-                                        TimeOfDay.now(),
+                                    initialTime: TimeOfDay.now(),
                                   );
 
                                   if (hora != null) {
                                     modalSetState(() {
-                                      _horarioSelecionado =
-                                          hora;
+                                      _horarioSelecionado = hora;
                                     });
                                   }
                                 },
 
                                 child: Container(
-                                  padding:
-                                      const EdgeInsets.symmetric(
+                                  padding: const EdgeInsets.symmetric(
                                     horizontal: 15,
                                     vertical: 15,
                                   ),
 
                                   decoration: BoxDecoration(
-                                    color:
-                                        Colors.grey.shade100,
+                                    color: Colors.grey.shade100,
 
-                                    borderRadius:
-                                        BorderRadius.circular(
-                                            15),
+                                    borderRadius: BorderRadius.circular(15),
                                   ),
 
                                   child: Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment
-                                            .spaceBetween,
+                                        MainAxisAlignment.spaceBetween,
 
                                     children: [
                                       Text(
-                                        _horarioSelecionado ==
-                                                null
+                                        _horarioSelecionado == null
                                             ? '--:--'
-                                            : _horarioSelecionado!
-                                                .format(
-                                                    context),
+                                            : _horarioSelecionado!.format(
+                                                context,
+                                              ),
                                       ),
 
-                                      const Icon(
-                                        Icons.access_time,
-                                        size: 18,
-                                      ),
+                                      const Icon(Icons.access_time, size: 18),
                                     ],
                                   ),
                                 ),
@@ -474,7 +440,6 @@ class _PageAgendaState extends State<PageAgenda> {
                           value: _repeticaoSelecionada,
 
                           items: const [
-
                             DropdownMenuItem(
                               value: 'Nunca',
                               child: Text('Nunca'),
@@ -521,36 +486,15 @@ class _PageAgendaState extends State<PageAgenda> {
                       runSpacing: 10,
 
                       children: [
+                        _buildTipoButton('Remédio', '💊', modalSetState),
 
-                        _buildTipoButton(
-                          'Remédio',
-                          '💊',
-                          modalSetState,
-                        ),
+                        _buildTipoButton('Médico', '🩺', modalSetState),
 
-                        _buildTipoButton(
-                          'Médico',
-                          '🩺',
-                          modalSetState,
-                        ),
+                        _buildTipoButton('Família', '❤️', modalSetState),
 
-                        _buildTipoButton(
-                          'Família',
-                          '❤️',
-                          modalSetState,
-                        ),
+                        _buildTipoButton('Pessoal', '😊', modalSetState),
 
-                        _buildTipoButton(
-                          'Pessoal',
-                          '😊',
-                          modalSetState,
-                        ),
-
-                        _buildTipoButton(
-                          'Outro',
-                          '✨',
-                          modalSetState,
-                        ),
+                        _buildTipoButton('Outro', '✨', modalSetState),
                       ],
                     ),
 
@@ -563,18 +507,13 @@ class _PageAgendaState extends State<PageAgenda> {
                       height: 60,
 
                       child: ElevatedButton(
-                        onPressed: () =>
-                            _salvarTarefa(index),
+                        onPressed: () => _salvarTarefa(index),
 
-                        style:
-                            ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Colors.green,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
 
                           shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(
-                                    18),
+                            borderRadius: BorderRadius.circular(18),
                           ),
                         ),
 
@@ -598,14 +537,9 @@ class _PageAgendaState extends State<PageAgenda> {
       },
     );
   }
-  
-  Widget _buildTipoButton(
-    String tipo,
-    String emoji,
-    Function modalSetState,
-  ) {
-    final selecionado =
-        _tipoSelecionado == tipo;
+
+  Widget _buildTipoButton(String tipo, String emoji, Function modalSetState) {
+    final selecionado = _tipoSelecionado == tipo;
 
     return GestureDetector(
       onTap: () {
@@ -616,40 +550,25 @@ class _PageAgendaState extends State<PageAgenda> {
 
       child: Container(
         width: 90,
-        padding: const EdgeInsets.symmetric(
-          vertical: 12,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 12),
 
         decoration: BoxDecoration(
-          color: selecionado
-              ? Colors.blue.shade50
-              : Colors.grey.shade100,
+          color: selecionado ? Colors.blue.shade50 : Colors.grey.shade100,
 
-          borderRadius:
-              BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(15),
 
           border: Border.all(
-            color: selecionado
-                ? Colors.blue
-                : Colors.grey.shade300,
+            color: selecionado ? Colors.blue : Colors.grey.shade300,
           ),
         ),
 
         child: Column(
           children: [
-            Text(
-              emoji,
-              style: const TextStyle(fontSize: 24),
-            ),
+            Text(emoji, style: const TextStyle(fontSize: 24)),
 
             const SizedBox(height: 5),
 
-            Text(
-              tipo,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text(tipo, style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -667,10 +586,26 @@ class _PageAgendaState extends State<PageAgenda> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 128,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            tooltip: 'Sair',
+            onPressed: () => Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginPage()),
+              (route) => false,
+            ),
+          ),
+        ],
         flexibleSpace: Container(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
           decoration: const BoxDecoration(
-            color: Color.fromARGB(255, 75, 202, 132),
+            // color: Color.fromARGB(255, 75, 202, 132),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF62C982), Color(0xFF23D7CC)],
+            ),
           ),
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
