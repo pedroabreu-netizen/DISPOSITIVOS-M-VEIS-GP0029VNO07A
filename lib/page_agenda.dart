@@ -6,7 +6,7 @@ import 'package:table_calendar/table_calendar.dart';
 
 import 'navigation/nav_index.dart';
 import 'page_login.dart';
-import 'objAux/tarefa.dart';
+import 'tarefa.dart';
 import 'widgets/nav_bar.dart';
 
 class PageAgenda extends StatefulWidget {
@@ -20,12 +20,15 @@ class _PageAgendaState extends State<PageAgenda> {
   static const String _storageKey = 'agenda';
 
   final List<Tarefa> _itens = [
+    //placeholder de exemplo
     Tarefa(
       titulo: 'Tomar remédio para pressão',
       descricao: '1 comprimido após café da manhã',
       concluida: false,
       horario: '10:00',
       tipo: 'Remédio',
+      data: '',
+      repeticao: ''
     ),
   ];
 
@@ -34,7 +37,7 @@ class _PageAgendaState extends State<PageAgenda> {
 
   static const String chaveTarefas = 'lista_ tarefas';
 
-  bool _modoBusca = false;
+  //bool _modoBusca = false;
 
   final TextEditingController _buscaController = TextEditingController();
 
@@ -71,12 +74,14 @@ class _PageAgendaState extends State<PageAgenda> {
       final tarefas = tarefasSalvas.map((item) {
         final dados = jsonDecode(item);
         return Tarefa(
-          titulo: dados["titulo"],
-          descricao: dados["descricao"],
-          concluida: dados["concluida"],
-          horario: dados["horario"],
-          tipo: dados["tipo"],
-        );
+            titulo: dados["titulo"],
+            descricao: dados["descricao"],
+            concluida: dados["concluida"],
+            horario: dados["horario"],
+            tipo: dados["tipo"],
+            data: dados["data"] ?? '',
+            repeticao: dados["repeticao"] ?? 'Nunca',
+          );
       }).toList();
       if (!mounted) return;
       setState(() {
@@ -115,9 +120,16 @@ class _PageAgendaState extends State<PageAgenda> {
             titulo: _tituloController.text,
             descricao: _descricaoController.text,
             concluida: false,
-            horario: '00:00',
-
-            tipo: 'Outro',
+            horario: _horarioSelecionado == null
+                ? '00:00'
+                : _horarioSelecionado!.format(context),
+            tipo: _tipoSelecionado,
+            data: _dataSelecionada == null
+              ? ''
+              : '${_dataSelecionada!.day.toString().padLeft(2, '0')}/'
+                '${_dataSelecionada!.month.toString().padLeft(2, '0')}/'
+                '${_dataSelecionada!.year}',
+            repeticao: _repeticaoSelecionada,
           ),
         );
       } else {
@@ -125,9 +137,17 @@ class _PageAgendaState extends State<PageAgenda> {
           titulo: _tituloController.text,
           descricao: _descricaoController.text,
           concluida: _itens[index].concluida,
-          horario: _itens[index].horario,
-          tipo: _itens[index].tipo,
-        );
+       horario: _horarioSelecionado == null
+          ? _itens[index].horario
+          : _horarioSelecionado!.format(context),
+        tipo: _tipoSelecionado,
+        data: _dataSelecionada == null
+          ? _itens[index].data
+          : '${_dataSelecionada!.day.toString().padLeft(2, '0')}/'
+            '${_dataSelecionada!.month.toString().padLeft(2, '0')}/'
+            '${_dataSelecionada!.year}',
+            repeticao: _repeticaoSelecionada,
+          );
       }
     });
 
@@ -486,15 +506,36 @@ class _PageAgendaState extends State<PageAgenda> {
                       runSpacing: 10,
 
                       children: [
-                        _buildTipoButton('Remédio', '💊', modalSetState),
 
-                        _buildTipoButton('Médico', '🩺', modalSetState),
+                        _buildTipoButton(
+                          'Remédio',
+                          '💊',
+                          modalSetState,
+                        ),
 
-                        _buildTipoButton('Família', '❤️', modalSetState),
+                        _buildTipoButton(
+                          'Médico',
+                          '🩺',
+                          modalSetState,
+                        ),
 
-                        _buildTipoButton('Pessoal', '😊', modalSetState),
+                        _buildTipoButton(
+                          'Família',
+                          '❤️',
+                          modalSetState,
+                        ),
 
-                        _buildTipoButton('Outro', '✨', modalSetState),
+                        _buildTipoButton(
+                          'Pessoal',
+                          '😊',
+                          modalSetState,
+                        ),
+
+                        _buildTipoButton(
+                          'Outro',
+                          '✨',
+                          modalSetState,
+                        ),
                       ],
                     ),
 
