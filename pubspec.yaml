@@ -20,7 +20,7 @@ dependencies:
   intl: ^0.20.2
   flutter_datetime_picker: ^1.5.1
   firebase_core: ^3.6.0
-  firebase_auth: ^5.3.1
+  firebase_auth: ^5.7.0
   cloud_firestore: ^5.4.4
   google_sign_in: ^6.2.1
 
