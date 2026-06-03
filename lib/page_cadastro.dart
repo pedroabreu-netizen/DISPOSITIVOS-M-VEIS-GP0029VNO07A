@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'utils/app_colors.dart';
 import 'utils/phone_input_formatter.dart';
@@ -220,7 +221,8 @@ class _CadastroPageState extends State<CadastroPage> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: GestureDetector(
-                            onTap: () => setState(() => _tipoUsuario = 'cuidador'),
+                            onTap: () =>
+                                setState(() => _tipoUsuario = 'cuidador'),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 150),
                               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -288,8 +290,32 @@ class _CadastroPageState extends State<CadastroPage> {
                     SizedBox(
                       height: 52,
                       child: ElevatedButton(
-                        onPressed: () {
-                          debugPrint('Cadastrar');
+                        onPressed: () async {
+                          try {
+                            await FirebaseAuth.instance
+                                .createUserWithEmailAndPassword(
+                                  email: _emailController.text.trim(),
+                                  password: _senhaController.text.trim(),
+                                );
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Cadastro realizado com sucesso!',
+                                ),
+                              ),
+                            );
+
+                            Navigator.of(context).maybePop();
+                          } on FirebaseAuthException catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  e.message ?? 'Erro ao cadastrar usuário',
+                                ),
+                              ),
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.buttonBackground,

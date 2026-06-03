@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'page_cadastro.dart';
 import 'page_home.dart';
@@ -16,6 +17,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool esconderSenha = true;
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController senhaController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -82,11 +85,15 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 46),
                     _label('Email'),
                     const SizedBox(height: 8),
-                    const CustomTextField(hintText: 'Digite seu email'),
+                    CustomTextField(
+                      controller: emailController,
+                      hintText: 'Digite seu email',
+                    ),
                     const SizedBox(height: 28),
                     _label('Senha'),
                     const SizedBox(height: 8),
                     CustomTextField(
+                      controller: senhaController,
                       hintText: '*******',
                       obscureText: esconderSenha,
                       suffixIcon: IconButton(
@@ -107,11 +114,11 @@ class _LoginPageState extends State<LoginPage> {
                     GestureDetector(
                       onTap: () {
                         Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const ForgotPasswordScreen(),
-                        ),
-                      );
-                    },
+                          MaterialPageRoute(
+                            builder: (context) => const ForgotPasswordScreen(),
+                          ),
+                        );
+                      },
                       child: const Text(
                         'Esqueceu a senha?',
                         style: TextStyle(
@@ -126,12 +133,28 @@ class _LoginPageState extends State<LoginPage> {
                       width: double.infinity,
                       height: 64,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => const HomePage(),
-                            ),
-                          );
+                        onPressed: () async {
+                          try {
+                            await FirebaseAuth.instance
+                                .signInWithEmailAndPassword(
+                                  email: emailController.text.trim(),
+                                  password: senhaController.text.trim(),
+                                );
+
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => const HomePage(),
+                              ),
+                            );
+                          } on FirebaseAuthException catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  e.message ?? 'Erro ao fazer login',
+                                ),
+                              ),
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.buttonBackground,
