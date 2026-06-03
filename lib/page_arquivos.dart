@@ -39,7 +39,7 @@ class _PageArquivosState extends State<PageArquivos> {
   Future<void> _escolherArquivo() async {
     setState(() => _carregando = true);
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'],
       );
