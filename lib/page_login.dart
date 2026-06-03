@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import 'page_cadastro.dart';
 import 'page_home.dart';
 import 'page_esqueci_senha.dart';
+import 'services/auth_service.dart';
 import 'utils/app_colors.dart';
 import 'widgets/custom_text_field.dart';
 import 'widgets/social_login_button.dart';
@@ -141,12 +144,20 @@ class _LoginPageState extends State<LoginPage> {
                                   password: senhaController.text.trim(),
                                 );
 
+                            if (!context.mounted) {
+                              return;
+                            }
+
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
                                 builder: (context) => const HomePage(),
                               ),
                             );
                           } on FirebaseAuthException catch (e) {
+                            if (!context.mounted) {
+                              return;
+                            }
+
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
@@ -205,11 +216,7 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                     const SizedBox(height: 34),
-                    SocialLoginButton(
-                      onPressed: () {
-                        debugPrint('Continuar com Google');
-                      },
-                    ),
+                    SocialLoginButton(onPressed: _entrarComGoogle),
                   ],
                 ),
               ),
@@ -218,6 +225,90 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _entrarComGoogle() async {
+    try {
+      await AuthService().entrarComGoogle();
+
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    } on GoogleSignInException catch (e) {
+      _mostrarErro(_mensagemErroGoogle(e));
+    } on FirebaseAuthException catch (e) {
+      _mostrarErro(_mensagemErroFirebase(e));
+    } on PlatformException catch (e) {
+      _mostrarErro(_mensagemErroPlataforma(e));
+    } catch (_) {
+      _mostrarErro(
+        'Não foi possível entrar com Google. Verifique sua conexão e tente novamente.',
+      );
+    }
+  }
+
+  String _mensagemErroGoogle(GoogleSignInException e) {
+    switch (e.code) {
+      case GoogleSignInExceptionCode.canceled:
+        return 'Login com Google cancelado.';
+      case GoogleSignInExceptionCode.interrupted:
+        return 'Login com Google interrompido. Tente novamente.';
+      case GoogleSignInExceptionCode.clientConfigurationError:
+      case GoogleSignInExceptionCode.providerConfigurationError:
+        return 'Google Sign-In não está configurado corretamente.';
+      case GoogleSignInExceptionCode.uiUnavailable:
+        return 'Não foi possível abrir a seleção de conta Google.';
+      case GoogleSignInExceptionCode.userMismatch:
+        return 'Credencial Google inválida para este usuário.';
+      default:
+        return e.description ?? 'Erro ao entrar com Google.';
+    }
+  }
+
+  String _mensagemErroFirebase(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'network-request-failed':
+        return 'Falha de conexão. Verifique sua internet e tente novamente.';
+      case 'invalid-credential':
+      case 'wrong-password':
+      case 'user-not-found':
+        return 'Credencial inválida.';
+      case 'account-exists-with-different-credential':
+        return 'Já existe uma conta com esse e-mail usando outro método de login.';
+      case 'popup-closed-by-user':
+      case 'cancelled-popup-request':
+        return 'Login com Google cancelado.';
+      default:
+        return e.message ?? 'Erro ao entrar com Google.';
+    }
+  }
+
+  String _mensagemErroPlataforma(PlatformException e) {
+    final codigo = e.code.toLowerCase();
+
+    if (codigo.contains('network')) {
+      return 'Falha de conexão. Verifique sua internet e tente novamente.';
+    }
+
+    if (codigo.contains('canceled') || codigo.contains('cancelled')) {
+      return 'Login com Google cancelado.';
+    }
+
+    return e.message ?? 'Erro ao entrar com Google.';
+  }
+
+  void _mostrarErro(String mensagem) {
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(mensagem)));
   }
 
   Widget _label(String texto) {

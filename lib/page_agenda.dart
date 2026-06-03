@@ -34,7 +34,7 @@ class _PageAgendaState extends State<PageAgenda> {
 
   static const String chaveTarefas = 'lista_ tarefas';
 
-  bool _modoBusca = false;
+  final bool _modoBusca = false;
 
   final TextEditingController _buscaController = TextEditingController();
 
