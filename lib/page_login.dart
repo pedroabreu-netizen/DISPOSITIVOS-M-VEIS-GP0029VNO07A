@@ -7,6 +7,7 @@ import 'page_esqueci_senha.dart';
 import 'utils/app_colors.dart';
 import 'widgets/custom_text_field.dart';
 import 'widgets/social_login_button.dart';
+import '../services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -135,12 +136,10 @@ class _LoginPageState extends State<LoginPage> {
                       child: ElevatedButton(
                         onPressed: () async {
                           try {
-                            await FirebaseAuth.instance
-                                .signInWithEmailAndPassword(
-                                  email: emailController.text.trim(),
-                                  password: senhaController.text.trim(),
-                                );
-
+                            await AuthService().entrar(
+                              email: emailController.text.trim(),
+                              senha: senhaController.text.trim(),
+                            );                                
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
                                 builder: (context) => const HomePage(),
@@ -152,6 +151,12 @@ class _LoginPageState extends State<LoginPage> {
                                 content: Text(
                                   e.message ?? 'Erro ao fazer login',
                                 ),
+                              ),
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(e.toString()),
                               ),
                             );
                           }

@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'utils/app_colors.dart';
 import 'utils/phone_input_formatter.dart';
 import 'widgets/custom_text_field.dart';
+import '../services/auth_service.dart';
 
 class CadastroPage extends StatefulWidget {
   const CadastroPage({super.key});
@@ -292,11 +293,10 @@ class _CadastroPageState extends State<CadastroPage> {
                       child: ElevatedButton(
                         onPressed: () async {
                           try {
-                            await FirebaseAuth.instance
-                                .createUserWithEmailAndPassword(
-                                  email: _emailController.text.trim(),
-                                  password: _senhaController.text.trim(),
-                                );
+                            await AuthService().cadastrar(
+                              email: _emailController.text.trim(),
+                              senha: _senhaController.text.trim(),
+                            );
 
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -315,7 +315,13 @@ class _CadastroPageState extends State<CadastroPage> {
                                 ),
                               ),
                             );
-                          }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(e.toString()),
+                                ),
+                              );
+                            }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.buttonBackground,
