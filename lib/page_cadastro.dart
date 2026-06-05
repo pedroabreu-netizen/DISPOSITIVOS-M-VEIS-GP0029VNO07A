@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'utils/app_colors.dart';
 import 'utils/phone_input_formatter.dart';
@@ -292,36 +293,47 @@ class _CadastroPageState extends State<CadastroPage> {
                       height: 52,
                       child: ElevatedButton(
                         onPressed: () async {
-                          try {
-                            await AuthService().cadastrar(
-                              email: _emailController.text.trim(),
-                              senha: _senhaController.text.trim(),
-                            );
+                        try {
+                          final credencial = await AuthService().cadastrar(
+                            email: _emailController.text.trim(),
+                            senha: _senhaController.text.trim(),
+                          );
 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Cadastro realizado com sucesso!',
-                                ),
-                              ),
-                            );
+                          await FirebaseFirestore.instance
+                              .collection('usuarios')
+                              .doc(credencial.user!.uid)
+                              .set({
+                                'nome': _nomeController.text.trim(),
+                                'email': _emailController.text.trim(),
+                                'telefone': _telefoneController.text.trim(),
+                                'dataNascimento': _dataController.text.trim(),
+                                'tipoUsuario': _tipoUsuario,
+                              });
 
-                            Navigator.of(context).maybePop();
-                          } on FirebaseAuthException catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  e.message ?? 'Erro ao cadastrar usuário',
-                                ),
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Cadastro realizado com sucesso!',
                               ),
-                            );
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(e.toString()),
-                                ),
-                              );
-                            }
+                            ),
+                          );
+
+                          Navigator.of(context).maybePop();
+                        } on FirebaseAuthException catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                e.message ?? 'Erro ao cadastrar usuário',
+                              ),
+                            ),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(e.toString()),
+                            ),
+                          );
+                        }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.buttonBackground,
