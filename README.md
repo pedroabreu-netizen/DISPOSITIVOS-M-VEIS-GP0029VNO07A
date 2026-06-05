@@ -8,7 +8,7 @@ Cada membro ficou com um "fluxo" específico do app, sendo as tasks respectivas 
 MEMBRO | FUNÇÃO <br/> 
 João Victor Prado | Telas relacionadas ao fluxo de Agenda (Agenda Cuidador, Agenda Idoso, Overlay tarefas na tela Agenda)<br/> 
 Guilherme Lobo brayner | Telas relacionadas ao fluxo Notas (Tela Notas, Modal de criação de Notas)<br/> 
-Flávia Monique  | telas inicial, cadastro de atividades e visualização das atividades<br/> 
+Flávia Monique  | Front - telas inicial, cadastro de atividades e visualização das atividades | Back - Validação de dominio @souunit.com.br, armazenamento das informações de cadastro no firebase <br/> 
 João Luís | Telas relacionadas ao fluxo de login e cadastro<br/> 
 Pedro | Banco de Dados, engenharia de software<br/> 
 João Lyra | Arquivos
