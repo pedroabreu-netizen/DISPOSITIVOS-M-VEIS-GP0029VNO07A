@@ -1,6 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
-import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -13,14 +11,17 @@ class AuthService {
     required String email,
     required String senha,
   }) async {
+    if (!isDomainValid(email)) {
+      throw Exception('Utilize um e-mail @souunit.com.br');
+    }
     try {
       return await _auth.createUserWithEmailAndPassword(
         email: email.trim(),
         password: senha.trim(),
       );
     } on FirebaseAuthException catch (e) {
-      debugPrint('Código: ${e.code}');
-      debugPrint('Mensagem: ${e.message}');
+      print('Código: ${e.code}');
+      print('Mensagem: ${e.message}');
       rethrow;
     }
   }
@@ -29,6 +30,10 @@ class AuthService {
     required String email,
     required String senha,
   }) async {
+    if (!isDomainValid(email)) {
+      throw Exception('Acesso permitido apenas para contas @souunit.com.br');
+    }
+
     try {
       return await _auth.signInWithEmailAndPassword(
         email: email.trim(),
@@ -73,20 +78,5 @@ class AuthService {
 
   Future<void> sair() async {
     await _auth.signOut();
-  }
-
-  Future<void> _inicializarGoogleSignIn() {
-    final initFuture = _googleSignInInitFuture;
-    if (initFuture != null) {
-      return initFuture;
-    }
-
-    final novoInitFuture = _googleSignIn.initialize().catchError((Object erro) {
-      _googleSignInInitFuture = null;
-      throw erro;
-    });
-
-    _googleSignInInitFuture = novoInitFuture;
-    return novoInitFuture;
   }
 }

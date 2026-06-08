@@ -3,10 +3,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'page_login.dart';
-//import 'page_perfil.dart';
 import 'tarefa.dart';
 import 'widgets/nav_bar.dart';
 import 'navigation/nav_index.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -33,10 +35,13 @@ class _HomePageState extends State<HomePage> {
 
   String _textoBusca = "";
 
+  String _nomeUsuario = '';
+  String _tipoUsuario = '';
+
   @override
   void initState() {
     super.initState();
-
+    _carregarUsuario();
     _carregarTarefas();
 
     _buscaController.addListener(() {
@@ -74,9 +79,28 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> _carregarTarefas() async {
+  Future<void> _carregarUsuario() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
 
-    
+    if (uid == null) return;
+
+    final doc = await FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(uid)
+        .get();
+
+        print('Documento existe: ${doc.exists}');
+        print('Dados: ${doc.data()}');
+
+    if (doc.exists) {
+      setState(() {
+        _nomeUsuario = doc['nome'];
+        _tipoUsuario = doc['tipoUsuario'];
+      });
+    }
+  }
+
+  Future<void> _carregarTarefas() async {
     final prefs = await SharedPreferences.getInstance();
 
     List<String>? tarefasSalvas =
@@ -742,51 +766,6 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        /*title: _modoBusca
-            ? TextField(
-                controller: _buscaController,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Buscar tarefa...',
-                  border: InputBorder.none,
-                ),
-              )
-            : const Text('Home'),*/
-        /*actions: [
-          IconButton(
-            icon: Icon(
-              _modoBusca
-                  ? Icons.close
-                  : Icons.search,
-            ),
-            onPressed: () {
-              setState(() {
-                if (_modoBusca) {
-                  _modoBusca = false;
-                  _buscaController.clear();
-                  _textoBusca = "";
-                } else {
-                  _modoBusca = true;
-                }
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Sair do Sistema',
-            onPressed: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      const LoginPage(),
-                ),
-                (route) => false,
-              );
-            },
-          ),
-        ],*/
-
         backgroundColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 220,
@@ -808,7 +787,7 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Olá, Maria',
+                'Olá, $_nomeUsuario',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -906,15 +885,60 @@ class _HomePageState extends State<HomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (index == 0)
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-                      child: Text(
-                        'Para fazer hoje',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 25,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+
+                        if (_tipoUsuario == 'cuidador')
+                          Container(
+                            margin: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade100,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.green.shade300,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.link, color: Colors.green),
+                                const SizedBox(width: 8),
+
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: const [
+                                      Text(
+                                        'Conectado',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Vinculado a Maria',
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                        const Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+                          child: Text(
+                            'Para fazer hoje',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 25,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                 Card(
                   margin:

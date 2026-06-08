@@ -10,6 +10,7 @@ import 'services/auth_service.dart';
 import 'utils/app_colors.dart';
 import 'widgets/custom_text_field.dart';
 import 'widgets/social_login_button.dart';
+import '../services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -144,10 +145,6 @@ class _LoginPageState extends State<LoginPage> {
                                   password: senhaController.text.trim(),
                                 );
 
-                            if (!context.mounted) {
-                              return;
-                            }
-
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
                                 builder: (context) => const HomePage(),
@@ -164,6 +161,10 @@ class _LoginPageState extends State<LoginPage> {
                                   e.message ?? 'Erro ao fazer login',
                                 ),
                               ),
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.toString())),
                             );
                           }
                         },
