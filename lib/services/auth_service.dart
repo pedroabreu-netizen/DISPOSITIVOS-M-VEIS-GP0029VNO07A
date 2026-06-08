@@ -1,4 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
+import 'package:google_sign_in/google_sign_in.dart';
+
+import '../utils/validacao_dominio.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -47,36 +51,90 @@ class AuthService {
   }
 
   Future<UserCredential> entrarComGoogle() async {
-    if (kIsWeb) {
-      return await _auth.signInWithPopup(GoogleAuthProvider());
+    try {
+      if (kIsWeb) {
+        final credencial = await _auth.signInWithPopup(GoogleAuthProvider());
+        return await _validarDominioGoogle(credencial);
+      }
+
+      await _inicializarGoogleSignIn();
+
+      if (!_googleSignIn.supportsAuthenticate()) {
+        throw FirebaseAuthException(
+          code: 'google-sign-in-unavailable',
+          message: 'Login com Google indisponível nesta plataforma.',
+        );
+      }
+
+      final contaGoogle = await _googleSignIn.authenticate();
+      final idToken = contaGoogle.authentication.idToken;
+
+      if (idToken == null) {
+        throw FirebaseAuthException(
+          code: 'invalid-credential',
+          message: 'Não foi possível obter a credencial do Google.',
+        );
+      }
+
+      final credencial = GoogleAuthProvider.credential(idToken: idToken);
+      final credencialUsuario = await _auth.signInWithCredential(credencial);
+
+      return await _validarDominioGoogle(credencialUsuario);
+    } on GoogleSignInException catch (e) {
+      throw Exception(_mensagemErroGoogle(e));
     }
-
-    await _inicializarGoogleSignIn();
-
-    if (!_googleSignIn.supportsAuthenticate()) {
-      throw FirebaseAuthException(
-        code: 'google-sign-in-unavailable',
-        message: 'Login com Google indisponível nesta plataforma.',
-      );
-    }
-
-    final contaGoogle = await _googleSignIn.authenticate();
-    final autenticacaoGoogle = contaGoogle.authentication;
-    final idToken = autenticacaoGoogle.idToken;
-
-    if (idToken == null) {
-      throw FirebaseAuthException(
-        code: 'invalid-credential',
-        message: 'Não foi possível obter a credencial do Google.',
-      );
-    }
-
-    final credencial = GoogleAuthProvider.credential(idToken: idToken);
-
-    return await _auth.signInWithCredential(credencial);
   }
 
   Future<void> sair() async {
     await _auth.signOut();
+  }
+
+  Future<void> _inicializarGoogleSignIn() {
+    final initFuture = _googleSignInInitFuture;
+    if (initFuture != null) {
+      return initFuture;
+    }
+
+    final novoInitFuture = _googleSignIn.initialize().catchError((Object erro) {
+      _googleSignInInitFuture = null;
+      throw erro;
+    });
+
+    _googleSignInInitFuture = novoInitFuture;
+    return novoInitFuture;
+  }
+
+  Future<UserCredential> _validarDominioGoogle(
+    UserCredential credencial,
+  ) async {
+    if (isDomainValid(credencial.user?.email)) {
+      return credencial;
+    }
+
+    await _auth.signOut();
+
+    if (!kIsWeb) {
+      await _googleSignIn.signOut();
+    }
+
+    throw Exception('Acesso permitido apenas para contas @souunit.com.br');
+  }
+
+  String _mensagemErroGoogle(GoogleSignInException erro) {
+    switch (erro.code) {
+      case GoogleSignInExceptionCode.canceled:
+        return 'Login com Google cancelado.';
+      case GoogleSignInExceptionCode.interrupted:
+        return 'Login com Google interrompido. Tente novamente.';
+      case GoogleSignInExceptionCode.clientConfigurationError:
+      case GoogleSignInExceptionCode.providerConfigurationError:
+        return 'Google Sign-In não está configurado corretamente.';
+      case GoogleSignInExceptionCode.uiUnavailable:
+        return 'Não foi possível abrir a seleção de conta Google.';
+      case GoogleSignInExceptionCode.userMismatch:
+        return 'Credencial Google inválida para este usuário.';
+      default:
+        return erro.description ?? 'Erro ao entrar com Google.';
+    }
   }
 }
