@@ -12,7 +12,20 @@
           "package_name": "com.example.dispositivos_moveis_gp0029vno07a"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "522524650443-0qmkpgjmlhmuihh0gc08vcop64d093nq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.dispositivos_moveis_gp0029vno07a",
+            "certificate_hash": "dd38589b50ae99652c362235841b8a37b3a80c1c"
+          }
+        },
+        {
+          "client_id": "522524650443-nj1j3isdm10a0ilht3cqgnkbnorbfn0v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDa2dCbxjaK0lLib5Y1r-6ZdjQbVGxIkhc"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "522524650443-nj1j3isdm10a0ilht3cqgnkbnorbfn0v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "522524650443-88hesesckotqmja5if47ij22gbuip3qp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.dispositivosMoveisGp0029vno07a"
+              }
+            }
+          ]
         }
       }
     }
