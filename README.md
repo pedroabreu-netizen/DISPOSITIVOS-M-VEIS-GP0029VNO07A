@@ -9,5 +9,5 @@ João Victor Prado | Front - Telas relacionadas ao fluxo de Agenda (Agenda Cuida
 Guilherme Lobo brayner | Telas relacionadas ao fluxo Notas (Tela Notas, Modal de criação de Notas) | Back - Inclusão do campo obrigatório criado_por, registrando o usuário responsável pelo cadastro dos dados. <br/>
 Flávia Monique | Front - telas inicial, cadastro de atividades e visualização das atividades | Back - Validação de dominio @souunit.com.br, armazenamento das informações de cadastro no firebase <br/>
 João Luís | Telas relacionadas ao fluxo de login e cadastro<br/>
-Pedro | Tela de Esqueci a Senha, integração com firebase<br/>
+Pedro | Tela de Esqueci a Senha, integração com firebase (persistência de tarefas e notas, exclusividade de usuário para visualização)<br/>
 João Lyra |  Tela de Arquivos, setup de firebase, vinculo de cuidador e idoso
