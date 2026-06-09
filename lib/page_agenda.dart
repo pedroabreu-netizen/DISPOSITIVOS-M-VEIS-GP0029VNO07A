@@ -22,6 +22,9 @@ class _PageAgendaState extends State<PageAgenda> {
   final TextEditingController _descricaoController = TextEditingController();
   final TextEditingController _buscaController = TextEditingController();
 
+  static const String chaveTarefas = 'lista_tarefas';
+  final bool _modoBusca = false;
+
   String _textoBusca = '';
   DateTime _diaSelecionado = DateTime.now();
   DateTime _diaFocado = DateTime.now();
