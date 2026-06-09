@@ -17,11 +17,6 @@ class PageNotas extends StatefulWidget {
 }
 
 class _PageNotasState extends State<PageNotas> {
-  final CollectionReference _notasCollection = FirebaseFirestore.instance
-      .collection('usuarios')
-      .doc('usuario_teste')
-      .collection('notas');
-
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _descricaoController = TextEditingController();
   final TextEditingController _tagsController = TextEditingController();
@@ -38,6 +33,16 @@ class _PageNotasState extends State<PageNotas> {
   ];
   final Set<String> _selectedCategorias = <String>{};
   DateTime? _selectedDate;
+
+  // função auxiliar pra capturar a subcoleção do usuário logado em tempo de execução
+  CollectionReference get _userNotasCollection {
+    final String userId =
+        FirebaseAuth.instance.currentUser?.uid ?? 'usuario_anonimo';
+    return FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(userId)
+        .collection('notas');
+  }
 
   @override
   void initState() {
@@ -83,10 +88,10 @@ class _PageNotasState extends State<PageNotas> {
 
     if (id == null) {
       // CREATE
-      await _notasCollection.add(novaNota.toMap());
+      await _userNotasCollection.add(novaNota.toMap());
     } else {
       // UPDATE
-      await _notasCollection.doc(id).update(novaNota.toMap());
+      await _userNotasCollection.doc(id).update(novaNota.toMap());
     }
 
     _tituloController.clear();
@@ -98,7 +103,7 @@ class _PageNotasState extends State<PageNotas> {
 
   Future<void> _excluirNota(String id) async {
     // DELETE
-    await _notasCollection.doc(id).delete();
+    await _userNotasCollection.doc(id).delete();
   }
 
   void _mostrarFormulario([Nota? nota]) {
@@ -416,7 +421,8 @@ class _PageNotasState extends State<PageNotas> {
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: _notasCollection.snapshots(),
+        // O Stream agora ouve dinamicamente apenas os dados do usuário autenticado
+        stream: _userNotasCollection.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Center(child: Text('Erro ao carregar notas.'));
@@ -549,7 +555,7 @@ class _PageNotasState extends State<PageNotas> {
         },
       ),
       floatingActionButton: Container(
-        padding: EdgeInsets.only(bottom: 15),
+        padding: const EdgeInsets.only(bottom: 15),
         child: Align(
           alignment: Alignment.bottomCenter,
           child: FloatingActionButton.extended(
@@ -558,13 +564,12 @@ class _PageNotasState extends State<PageNotas> {
               ' Adicionar Nota',
               style: TextStyle(fontSize: 24),
             ),
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
             backgroundColor: const Color.fromARGB(255, 62, 172, 111),
             foregroundColor: Colors.white,
           ),
         ),
       ),
-
       bottomNavigationBar: NavBar(
         currentIndex: 2,
         onTap: (index) => navigateByIndex(context, 2, index),
