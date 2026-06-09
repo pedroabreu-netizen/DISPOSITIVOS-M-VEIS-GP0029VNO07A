@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'page_login.dart';
+import 'page_vinculo.dart';
+import 'services/vinculo_service.dart';
 import 'tarefa.dart';
 import 'widgets/nav_bar.dart';
 import 'navigation/nav_index.dart';
@@ -20,23 +22,23 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<Tarefa> _itens = [];
 
-  final TextEditingController _tituloController =
-      TextEditingController();
+  final TextEditingController _tituloController = TextEditingController();
 
-  final TextEditingController _descricaoController =
-      TextEditingController();
+  final TextEditingController _descricaoController = TextEditingController();
 
   static const String chaveTarefas = "lista_tarefas";
 
   //bool _modoBusca = false;
 
-  final TextEditingController _buscaController =
-      TextEditingController();
+  final TextEditingController _buscaController = TextEditingController();
 
   String _textoBusca = "";
 
   String _nomeUsuario = '';
   String _tipoUsuario = '';
+  String? _nomeVinculado;
+
+  final VinculoService _vinculoService = VinculoService();
 
   @override
   void initState() {
@@ -46,8 +48,7 @@ class _HomePageState extends State<HomePage> {
 
     _buscaController.addListener(() {
       setState(() {
-        _textoBusca =
-            _buscaController.text.toLowerCase();
+        _textoBusca = _buscaController.text.toLowerCase();
       });
     });
   }
@@ -73,10 +74,7 @@ class _HomePageState extends State<HomePage> {
       });
     }).toList();
 
-    await prefs.setStringList(
-      chaveTarefas,
-      tarefasJson,
-    );
+    await prefs.setStringList(chaveTarefas, tarefasJson);
   }
 
   Future<void> _carregarUsuario() async {
@@ -89,22 +87,36 @@ class _HomePageState extends State<HomePage> {
         .doc(uid)
         .get();
 
-        print('Documento existe: ${doc.exists}');
-        print('Dados: ${doc.data()}');
+    print('Documento existe: ${doc.exists}');
+    print('Dados: ${doc.data()}');
 
     if (doc.exists) {
       setState(() {
         _nomeUsuario = doc['nome'];
         _tipoUsuario = doc['tipoUsuario'];
       });
+
+      _carregarVinculo(uid);
     }
+  }
+
+  Future<void> _carregarVinculo(String uid) async {
+    final vinculado = await _vinculoService.buscarUsuarioVinculado(
+      uid,
+      _tipoUsuario,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _nomeVinculado = vinculado?['nome'] as String?;
+    });
   }
 
   Future<void> _carregarTarefas() async {
     final prefs = await SharedPreferences.getInstance();
 
-    List<String>? tarefasSalvas =
-        prefs.getStringList(chaveTarefas);
+    List<String>? tarefasSalvas = prefs.getStringList(chaveTarefas);
 
     if (tarefasSalvas != null) {
       setState(() {
@@ -131,7 +143,7 @@ class _HomePageState extends State<HomePage> {
 
   void _salvarTarefa(int? index) async {
     if (_tituloController.text.isEmpty ||
-        _descricaoController.text.isEmpty || 
+        _descricaoController.text.isEmpty ||
         _tipoSelecionado.isEmpty) {
       return;
     }
@@ -148,10 +160,10 @@ class _HomePageState extends State<HomePage> {
                 : _horarioSelecionado!.format(context),
             tipo: _tipoSelecionado,
             data: _dataSelecionada == null
-              ? ''
-              : '${_dataSelecionada!.day.toString().padLeft(2, '0')}/'
-                '${_dataSelecionada!.month.toString().padLeft(2, '0')}/'
-                '${_dataSelecionada!.year}',
+                ? ''
+                : '${_dataSelecionada!.day.toString().padLeft(2, '0')}/'
+                      '${_dataSelecionada!.month.toString().padLeft(2, '0')}/'
+                      '${_dataSelecionada!.year}',
             repeticao: _repeticaoSelecionada,
           ),
         );
@@ -160,17 +172,17 @@ class _HomePageState extends State<HomePage> {
           titulo: _tituloController.text,
           descricao: _descricaoController.text,
           concluida: _itens[index].concluida,
-       horario: _horarioSelecionado == null
-          ? _itens[index].horario
-          : _horarioSelecionado!.format(context),
-        tipo: _tipoSelecionado,
-        data: _dataSelecionada == null
-          ? _itens[index].data
-          : '${_dataSelecionada!.day.toString().padLeft(2, '0')}/'
-            '${_dataSelecionada!.month.toString().padLeft(2, '0')}/'
-            '${_dataSelecionada!.year}',
-            repeticao: _repeticaoSelecionada,
-          );
+          horario: _horarioSelecionado == null
+              ? _itens[index].horario
+              : _horarioSelecionado!.format(context),
+          tipo: _tipoSelecionado,
+          data: _dataSelecionada == null
+              ? _itens[index].data
+              : '${_dataSelecionada!.day.toString().padLeft(2, '0')}/'
+                    '${_dataSelecionada!.month.toString().padLeft(2, '0')}/'
+                    '${_dataSelecionada!.year}',
+          repeticao: _repeticaoSelecionada,
+        );
       }
     });
 
@@ -189,7 +201,8 @@ class _HomePageState extends State<HomePage> {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmar exclusão', 
+        title: const Text(
+          'Confirmar exclusão',
           style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
         content: const Text(
@@ -198,8 +211,7 @@ class _HomePageState extends State<HomePage> {
         ),
         actions: [
           TextButton(
-            onPressed: () =>
-                Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(context, false),
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
@@ -207,9 +219,7 @@ class _HomePageState extends State<HomePage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
-              textStyle: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
+              textStyle: const TextStyle(fontWeight: FontWeight.bold),
             ),
             child: const Text('Apagar'),
           ),
@@ -217,19 +227,18 @@ class _HomePageState extends State<HomePage> {
       ),
     );
     if (confirmar == true) {
-        setState(() {
-          _itens.removeAt(index);
-        });
+      setState(() {
+        _itens.removeAt(index);
+      });
 
-        await _salvarNoStorage();
-      }
+      await _salvarNoStorage();
     }
+  }
 
-    void _mostrarFormulario([int? index]) {
+  void _mostrarFormulario([int? index]) {
     if (index != null) {
       _tituloController.text = _itens[index].titulo;
-      _descricaoController.text =
-          _itens[index].descricao;
+      _descricaoController.text = _itens[index].descricao;
 
       _tipoSelecionado = _itens[index].tipo;
     } else {
@@ -251,29 +260,23 @@ class _HomePageState extends State<HomePage> {
                 left: 20,
                 right: 20,
                 top: 20,
-                bottom:
-                    MediaQuery.of(context).viewInsets.bottom + 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
               ),
 
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(30),
-                ),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
               ),
 
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
 
                   children: [
-
                     /// CABEÇALHO
                     Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
                           'Nova Tarefa',
@@ -284,8 +287,7 @@ class _HomePageState extends State<HomePage> {
                         ),
 
                         CircleAvatar(
-                          backgroundColor:
-                              Colors.grey.shade200,
+                          backgroundColor: Colors.grey.shade200,
 
                           child: IconButton(
                             icon: const Icon(Icons.close),
@@ -320,8 +322,7 @@ class _HomePageState extends State<HomePage> {
                         fillColor: Colors.grey.shade100,
 
                         border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(15),
                           borderSide: BorderSide.none,
                         ),
                       ),
@@ -345,15 +346,13 @@ class _HomePageState extends State<HomePage> {
                       maxLines: 3,
 
                       decoration: InputDecoration(
-                        hintText:
-                            'Adicione informações extras aqui...',
+                        hintText: 'Adicione informações extras aqui...',
 
                         filled: true,
                         fillColor: Colors.grey.shade100,
 
                         border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(15),
                           borderSide: BorderSide.none,
                         ),
                       ),
@@ -364,27 +363,21 @@ class _HomePageState extends State<HomePage> {
                     /// DATA E HORA
                     Row(
                       children: [
-
                         /// DATA
                         Expanded(
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
 
                             children: [
                               const Text(
                                 'Data',
-                                style: TextStyle(
-                                  fontWeight:
-                                      FontWeight.bold,
-                                ),
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
 
                               const SizedBox(height: 8),
 
                               GestureDetector(
                                 onTap: () async {
-
                                   final data = await showDatePicker(
                                     context: context,
 
@@ -419,13 +412,12 @@ class _HomePageState extends State<HomePage> {
                                         MainAxisAlignment.spaceBetween,
 
                                     children: [
-
                                       Text(
                                         _dataSelecionada == null
                                             ? 'Selecionar'
                                             : '${_dataSelecionada!.day.toString().padLeft(2, '0')}/'
-                                              '${_dataSelecionada!.month.toString().padLeft(2, '0')}/'
-                                              '${_dataSelecionada!.year}',
+                                                  '${_dataSelecionada!.month.toString().padLeft(2, '0')}/'
+                                                  '${_dataSelecionada!.year}',
                                       ),
 
                                       const Icon(
@@ -445,73 +437,56 @@ class _HomePageState extends State<HomePage> {
                         /// HORA
                         Expanded(
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
 
                             children: [
                               const Text(
                                 'Hora',
-                                style: TextStyle(
-                                  fontWeight:
-                                      FontWeight.bold,
-                                ),
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
 
                               const SizedBox(height: 8),
 
                               GestureDetector(
                                 onTap: () async {
-
-                                  final hora =
-                                      await showTimePicker(
+                                  final hora = await showTimePicker(
                                     context: context,
-                                    initialTime:
-                                        TimeOfDay.now(),
+                                    initialTime: TimeOfDay.now(),
                                   );
 
                                   if (hora != null) {
                                     modalSetState(() {
-                                      _horarioSelecionado =
-                                          hora;
+                                      _horarioSelecionado = hora;
                                     });
                                   }
                                 },
 
                                 child: Container(
-                                  padding:
-                                      const EdgeInsets.symmetric(
+                                  padding: const EdgeInsets.symmetric(
                                     horizontal: 15,
                                     vertical: 15,
                                   ),
 
                                   decoration: BoxDecoration(
-                                    color:
-                                        Colors.grey.shade100,
+                                    color: Colors.grey.shade100,
 
-                                    borderRadius:
-                                        BorderRadius.circular(
-                                            15),
+                                    borderRadius: BorderRadius.circular(15),
                                   ),
 
                                   child: Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment
-                                            .spaceBetween,
+                                        MainAxisAlignment.spaceBetween,
 
                                     children: [
                                       Text(
-                                        _horarioSelecionado ==
-                                                null
+                                        _horarioSelecionado == null
                                             ? '--:--'
-                                            : _horarioSelecionado!
-                                                .format(
-                                                    context),
+                                            : _horarioSelecionado!.format(
+                                                context,
+                                              ),
                                       ),
 
-                                      const Icon(
-                                        Icons.access_time,
-                                        size: 18,
-                                      ),
+                                      const Icon(Icons.access_time, size: 18),
                                     ],
                                   ),
                                 ),
@@ -553,7 +528,6 @@ class _HomePageState extends State<HomePage> {
                           value: _repeticaoSelecionada,
 
                           items: const [
-
                             DropdownMenuItem(
                               value: 'Nunca',
                               child: Text('Nunca'),
@@ -600,36 +574,15 @@ class _HomePageState extends State<HomePage> {
                       runSpacing: 10,
 
                       children: [
+                        _buildTipoButton('Remédio', '💊', modalSetState),
 
-                        _buildTipoButton(
-                          'Remédio',
-                          '💊',
-                          modalSetState,
-                        ),
+                        _buildTipoButton('Médico', '🩺', modalSetState),
 
-                        _buildTipoButton(
-                          'Médico',
-                          '🩺',
-                          modalSetState,
-                        ),
+                        _buildTipoButton('Família', '❤️', modalSetState),
 
-                        _buildTipoButton(
-                          'Família',
-                          '❤️',
-                          modalSetState,
-                        ),
+                        _buildTipoButton('Pessoal', '😊', modalSetState),
 
-                        _buildTipoButton(
-                          'Pessoal',
-                          '😊',
-                          modalSetState,
-                        ),
-
-                        _buildTipoButton(
-                          'Outro',
-                          '✨',
-                          modalSetState,
-                        ),
+                        _buildTipoButton('Outro', '✨', modalSetState),
                       ],
                     ),
 
@@ -642,18 +595,13 @@ class _HomePageState extends State<HomePage> {
                       height: 60,
 
                       child: ElevatedButton(
-                        onPressed: () =>
-                            _salvarTarefa(index),
+                        onPressed: () => _salvarTarefa(index),
 
-                        style:
-                            ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Colors.green,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
 
                           shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(
-                                    18),
+                            borderRadius: BorderRadius.circular(18),
                           ),
                         ),
 
@@ -678,13 +626,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildTipoButton(
-    String tipo,
-    String emoji,
-    Function modalSetState,
-  ) {
-    final selecionado =
-        _tipoSelecionado == tipo;
+  Widget _buildTipoButton(String tipo, String emoji, Function modalSetState) {
+    final selecionado = _tipoSelecionado == tipo;
 
     return GestureDetector(
       onTap: () {
@@ -695,74 +638,58 @@ class _HomePageState extends State<HomePage> {
 
       child: Container(
         width: 90,
-        padding: const EdgeInsets.symmetric(
-          vertical: 12,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 12),
 
         decoration: BoxDecoration(
-          color: selecionado
-              ? Colors.blue.shade50
-              : Colors.grey.shade100,
+          color: selecionado ? Colors.blue.shade50 : Colors.grey.shade100,
 
-          borderRadius:
-              BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(15),
 
           border: Border.all(
-            color: selecionado
-                ? Colors.blue
-                : Colors.grey.shade300,
+            color: selecionado ? Colors.blue : Colors.grey.shade300,
           ),
         ),
 
         child: Column(
           children: [
-            Text(
-              emoji,
-              style: const TextStyle(fontSize: 24),
-            ),
+            Text(emoji, style: const TextStyle(fontSize: 24)),
 
             const SizedBox(height: 5),
 
-            Text(
-              tipo,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text(tipo, style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
       ),
     );
   }
 
-  String dataFormatada = DateFormat("EEEE d 'de' MMMM", 'pt_BR').format(DateTime.now());
+  String dataFormatada = DateFormat(
+    "EEEE d 'de' MMMM",
+    'pt_BR',
+  ).format(DateTime.now());
 
   @override
   Widget build(BuildContext context) {
-  final hoje =
-      '${DateTime.now().day.toString().padLeft(2, '0')}/'
-      '${DateTime.now().month.toString().padLeft(2, '0')}/'
-      '${DateTime.now().year}';
+    final hoje =
+        '${DateTime.now().day.toString().padLeft(2, '0')}/'
+        '${DateTime.now().month.toString().padLeft(2, '0')}/'
+        '${DateTime.now().year}';
 
-  final tarefasFiltradas = _itens.where((tarefa) {
+    final tarefasFiltradas = _itens.where((tarefa) {
+      final mesmaData = tarefa.data == hoje;
 
-    final mesmaData = tarefa.data == hoje;
+      final mesmaBusca = tarefa.titulo.toLowerCase().contains(_textoBusca);
 
-    final mesmaBusca = tarefa.titulo
-        .toLowerCase()
-        .contains(_textoBusca);
+      return mesmaData && mesmaBusca;
+    }).toList();
 
-    return mesmaData && mesmaBusca;
+    final concluidasHoje = tarefasFiltradas
+        .where((tarefa) => tarefa.concluida)
+        .length;
 
-  }).toList();
-
-  final concluidasHoje = tarefasFiltradas
-    .where((tarefa) => tarefa.concluida)
-    .length;
-
-  final pendentes = tarefasFiltradas
-    .where((tarefa) => !tarefa.concluida)
-    .length;
+    final pendentes = tarefasFiltradas
+        .where((tarefa) => !tarefa.concluida)
+        .length;
 
     return Scaffold(
       appBar: AppBar(
@@ -775,12 +702,8 @@ class _HomePageState extends State<HomePage> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors:[
-               Color(0xFF62C982),
-               Color(0xFF23D7CC)
-              ]
+              colors: [Color(0xFF62C982), Color(0xFF23D7CC)],
             ),
-
           ),
 
           child: Column(
@@ -800,17 +723,18 @@ class _HomePageState extends State<HomePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    dataFormatada,
-                    style: TextStyle(color: Colors.white70),
-                  ),
+                  Text(dataFormatada, style: TextStyle(color: Colors.white70)),
                   GestureDetector(
                     onTap: () => Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (_) => const LoginPage()),
                       (route) => false,
                     ),
-                    child: const Icon(Icons.logout, color: Colors.white, size: 20),
+                    child: const Icon(
+                      Icons.logout,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
                 ],
               ),
@@ -822,272 +746,280 @@ class _HomePageState extends State<HomePage> {
                   borderRadius: BorderRadius.circular(15),
                 ),
 
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Column(
-                    children: [
-                      Text('$concluidasHoje',
-                        style:TextStyle(fontSize: 35, 
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        )
-                      ),
-                      Text('Concluídas hoje',
-                          style: TextStyle(color: Colors.white,
-                          fontWeight: FontWeight.bold, fontSize: 15)
-                        ),
-                    ],
-                  ),
-
-                  Container(width: 1, height: 30, color: Colors.white),
-
-                  Column(
-                    children: [
-                      Text('$pendentes',
-                          style:
-                              TextStyle(fontSize: 35, 
-                              color: Colors.orange,
-                              fontWeight: FontWeight.bold,)
-                          ),
-                      Text('Pendentes',
-                          style: TextStyle(color: Colors.white,
-                          fontWeight: FontWeight.bold, fontSize: 15)
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            )
-          ],      
-        ),
-      ),
-      ),
-      body: tarefasFiltradas.isEmpty
-          ? const Center(
-              child: Text(
-                "Nenhuma tarefa cadastrada.",
-              ),
-            )  
-          : ListView.builder(
-
-              itemCount: tarefasFiltradas.length,
-              itemBuilder: (context, index) {
-                final tarefa =
-                    tarefasFiltradas[index];
-
-                final indexOriginal =
-                    _itens.indexOf(tarefa);
-
-                SizedBox(height: 20);
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (index == 0)
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-
-                        if (_tipoUsuario == 'cuidador')
-                          Container(
-                            margin: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.green.shade100,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.green.shade300,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.link, color: Colors.green),
-                                const SizedBox(width: 8),
-
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: const [
-                                      Text(
-                                        'Conectado',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Vinculado a Maria',
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                        Text(
+                          '$concluidasHoje',
+                          style: TextStyle(
+                            fontSize: 35,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
                           ),
-
-                        const Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
-                          ),
-                          child: Text(
-                            'Para fazer hoje',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 25,
-                            ),
+                        ),
+                        Text(
+                          'Concluídas hoje',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
                           ),
                         ),
                       ],
                     ),
-                Card(
-                  margin:
-                      const EdgeInsets.symmetric(
-                    horizontal: 15,
-                    vertical: 6,
+
+                    Container(width: 1, height: 30, color: Colors.white),
+
+                    Column(
+                      children: [
+                        Text(
+                          '$pendentes',
+                          style: TextStyle(
+                            fontSize: 35,
+                            color: Colors.orange,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Pendentes',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PageVinculo(tipoUsuario: _tipoUsuario),
+                ),
+              );
+              _carregarUsuario();
+            },
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: _nomeVinculado != null
+                    ? Colors.green.shade100
+                    : Colors.orange.shade100,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _nomeVinculado != null
+                      ? Colors.green.shade300
+                      : Colors.orange.shade300,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _nomeVinculado != null ? Icons.link : Icons.link_off,
+                    color: _nomeVinculado != null
+                        ? Colors.green
+                        : Colors.orange,
                   ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _nomeVinculado != null
+                              ? 'Conectado'
+                              : 'Nenhum vínculo',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          _nomeVinculado != null
+                              ? 'Vinculado a $_nomeVinculado'
+                              : (_tipoUsuario == 'idoso'
+                                    ? 'Toque para gerar um código de vínculo'
+                                    : 'Toque para inserir o código do idoso'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Text(
+              'Para fazer hoje',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+            ),
+          ),
+          Expanded(
+            child: tarefasFiltradas.isEmpty
+                ? const Center(child: Text("Nenhuma tarefa cadastrada."))
+                : ListView.builder(
+                    itemCount: tarefasFiltradas.length,
+                    itemBuilder: (context, index) {
+                      final tarefa = tarefasFiltradas[index];
+                      final indexOriginal = _itens.indexOf(tarefa);
 
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Transform.scale(
-                            scale: 1.5,
-                            child: Checkbox(
-                              value: tarefa.concluida,
-                              onChanged: (value) async {
-                                setState(() {
-                                  _itens[indexOriginal].concluida =
-                                      value ?? false;
-                                });
-                                await _salvarNoStorage();
-                              },
-                              shape: CircleBorder(),
-                              activeColor: Colors.green,
-                              checkColor: Colors.white, 
-                            ),
-                          ),
-                          
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  tarefa.titulo,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 4),
-
-                                Text(
-                                  tarefa.descricao,
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          IconButton(
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              color: Colors.grey,
-                              size: 35,
-                            ),
-                            onPressed: () =>
-                                _excluirTarefa(indexOriginal),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      Padding(
-                        padding: const EdgeInsets.only(left: 50),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.withOpacity(0.2),
-                                borderRadius:
-                                    BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                tarefa.tipo,
-                                style: const TextStyle(
-                                  color: Colors.orange,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(width: 10),
-
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
-                                borderRadius:
-                                    BorderRadius.circular(20),
-                              ),
-                              child: Row(
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 15,
+                          vertical: 6,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(
-                                    Icons.access_time,
-                                    size: 16,
-                                    color: Colors.grey,
+                                  Transform.scale(
+                                    scale: 1.5,
+                                    child: Checkbox(
+                                      value: tarefa.concluida,
+                                      onChanged: (value) async {
+                                        setState(() {
+                                          _itens[indexOriginal].concluida =
+                                              value ?? false;
+                                        });
+                                        await _salvarNoStorage();
+                                      },
+                                      shape: CircleBorder(),
+                                      activeColor: Colors.green,
+                                      checkColor: Colors.white,
+                                    ),
                                   ),
 
-                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          tarefa.titulo,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                          ),
+                                        ),
 
-                                  Text(
-                                    tarefa.horario,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black54,
+                                        const SizedBox(height: 4),
+
+                                        Text(
+                                          tarefa.descricao,
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
                                     ),
+                                  ),
+
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      color: Colors.grey,
+                                      size: 35,
+                                    ),
+                                    onPressed: () =>
+                                        _excluirTarefa(indexOriginal),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
+
+                              const SizedBox(height: 12),
+
+                              Padding(
+                                padding: const EdgeInsets.only(left: 50),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        tarefa.tipo,
+                                        style: const TextStyle(
+                                          color: Colors.orange,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+
+                                    const SizedBox(width: 10),
+
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade200,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.access_time,
+                                            size: 16,
+                                            color: Colors.grey,
+                                          ),
+
+                                          const SizedBox(width: 4),
+
+                                          Text(
+                                            tarefa.horario,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black54,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                ),
-                ),
-                ],
-              );
-            },
           ),
+        ],
+      ),
       floatingActionButton: Container(
         padding: EdgeInsets.only(bottom: 15),
         child: Align(
           alignment: Alignment.bottomCenter,
           child: FloatingActionButton.extended(
-           onPressed: () =>
-            _mostrarFormulario(),
+            onPressed: () => _mostrarFormulario(),
             icon: const Icon(Icons.add),
-            label: const Text(' Adicionar tarefa',
+            label: const Text(
+              ' Adicionar tarefa',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             backgroundColor: const Color.fromARGB(255, 62, 172, 111),
