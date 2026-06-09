@@ -17,10 +17,14 @@ class PageNotas extends StatefulWidget {
 }
 
 class _PageNotasState extends State<PageNotas> {
-  final CollectionReference _notasCollection = FirebaseFirestore.instance
-      .collection('usuarios')
-      .doc('usuario_teste')
-      .collection('notas');
+  CollectionReference get _notasCollection {
+    final String userId =
+        FirebaseAuth.instance.currentUser?.uid ?? 'usuario_anonimo';
+    return FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(userId)
+        .collection('notas');
+  }
 
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _descricaoController = TextEditingController();
