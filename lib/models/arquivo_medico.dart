@@ -25,6 +25,7 @@ class ArquivoMedico {
   final DateTime dataUpload;
   final int tamanhoBytes;
   final String extensao;
+  final String criadoPor;
   final String? caminhoLocal;
   final String? urlRemota;
 
@@ -35,6 +36,7 @@ class ArquivoMedico {
     required this.dataUpload,
     required this.tamanhoBytes,
     required this.extensao,
+    this.criadoPor = '',
     this.caminhoLocal,
     this.urlRemota,
   });
@@ -58,21 +60,23 @@ class ArquivoMedico {
       dataUpload: DateTime.parse(json['dataUpload'] as String),
       tamanhoBytes: json['tamanhoBytes'] as int,
       extensao: json['extensao'] as String,
+      criadoPor: json['criado_por'] as String? ?? '',
       caminhoLocal: json['caminhoLocal'] as String?,
       urlRemota: json['urlRemota'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'nome': nome,
-        'categoria': categoria.name,
-        'dataUpload': dataUpload.toIso8601String(),
-        'tamanhoBytes': tamanhoBytes,
-        'extensao': extensao,
-        if (caminhoLocal != null) 'caminhoLocal': caminhoLocal,
-        if (urlRemota != null) 'urlRemota': urlRemota,
-      };
+    'id': id,
+    'nome': nome,
+    'categoria': categoria.name,
+    'dataUpload': dataUpload.toIso8601String(),
+    'tamanhoBytes': tamanhoBytes,
+    'extensao': extensao,
+    'criado_por': criadoPor,
+    if (caminhoLocal != null) 'caminhoLocal': caminhoLocal,
+    if (urlRemota != null) 'urlRemota': urlRemota,
+  };
 
   ArquivoMedico copyWith({
     String? id,
@@ -81,6 +85,7 @@ class ArquivoMedico {
     DateTime? dataUpload,
     int? tamanhoBytes,
     String? extensao,
+    String? criadoPor,
     String? caminhoLocal,
     String? urlRemota,
   }) {
@@ -91,6 +96,7 @@ class ArquivoMedico {
       dataUpload: dataUpload ?? this.dataUpload,
       tamanhoBytes: tamanhoBytes ?? this.tamanhoBytes,
       extensao: extensao ?? this.extensao,
+      criadoPor: criadoPor ?? this.criadoPor,
       caminhoLocal: caminhoLocal ?? this.caminhoLocal,
       urlRemota: urlRemota ?? this.urlRemota,
     );
