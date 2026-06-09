@@ -51,7 +51,8 @@ class _HomePageState extends State<HomePage> {
   String _repeticaoSelecionada = 'Nunca';
 
   CollectionReference get _userTarefasCollection {
-    final String userId = FirebaseAuth.instance.currentUser?.uid ?? 'usuario_anonimo';
+    final String userId =
+        FirebaseAuth.instance.currentUser?.uid ?? 'usuario_anonimo';
     return FirebaseFirestore.instance
         .collection('usuarios')
         .doc(userId)
@@ -120,7 +121,9 @@ class _HomePageState extends State<HomePage> {
     if (tarefaExistente == null) {
       await _userTarefasCollection.add(novaTarefa.toMap());
     } else {
-      await _userTarefasCollection.doc(tarefaExistente.id!).update(novaTarefa.toMap());
+      await _userTarefasCollection
+          .doc(tarefaExistente.id!)
+          .update(novaTarefa.toMap());
     }
 
     _tituloController.clear();
@@ -168,9 +171,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _alternarStatusTarefa(Tarefa tarefa, bool valor) async {
-    await _userTarefasCollection.doc(tarefa.id!).update({
-      'concluida': valor,
-    });
+    await _userTarefasCollection.doc(tarefa.id!).update({'concluida': valor});
   }
 
   void _mostrarFormulario([Tarefa? tarefa]) {
@@ -216,7 +217,10 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         const Text(
                           'Nova Tarefa',
-                          style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         CircleAvatar(
                           backgroundColor: Colors.grey.shade200,
@@ -228,7 +232,13 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                     const SizedBox(height: 25),
-                    const Text('O que é?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    const Text(
+                      'O que é?',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
                     const SizedBox(height: 10),
                     TextField(
                       controller: _tituloController,
@@ -236,11 +246,20 @@ class _HomePageState extends State<HomePage> {
                         hintText: 'Ex: Tomar remédio',
                         filled: true,
                         fillColor: Colors.grey.shade100,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide.none,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Text('Detalhes (opcional)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    const Text(
+                      'Detalhes (opcional)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
                     const SizedBox(height: 10),
                     TextField(
                       controller: _descricaoController,
@@ -249,7 +268,10 @@ class _HomePageState extends State<HomePage> {
                         hintText: 'Adicione informações extras aqui...',
                         filled: true,
                         fillColor: Colors.grey.shade100,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide.none,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 25),
@@ -259,13 +281,17 @@ class _HomePageState extends State<HomePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Data', style: TextStyle(fontWeight: FontWeight.bold)),
+                              const Text(
+                                'Data',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                               const SizedBox(height: 8),
                               GestureDetector(
                                 onTap: () async {
                                   final data = await showDatePicker(
                                     context: context,
-                                    initialDate: _dataSelecionada ?? DateTime.now(),
+                                    initialDate:
+                                        _dataSelecionada ?? DateTime.now(),
                                     firstDate: DateTime(2020),
                                     lastDate: DateTime(2030),
                                   );
@@ -276,19 +302,32 @@ class _HomePageState extends State<HomePage> {
                                   }
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                                  decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(15)),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 15,
+                                    vertical: 15,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade100,
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         _dataSelecionada == null
-                                            ? (tarefa != null && tarefa.data.isNotEmpty ? tarefa.data : 'Selecionar')
+                                            ? (tarefa != null &&
+                                                      tarefa.data.isNotEmpty
+                                                  ? tarefa.data
+                                                  : 'Selecionar')
                                             : '${_dataSelecionada!.day.toString().padLeft(2, '0')}/'
                                                   '${_dataSelecionada!.month.toString().padLeft(2, '0')}/'
                                                   '${_dataSelecionada!.year}',
                                       ),
-                                      const Icon(Icons.calendar_today, size: 18),
+                                      const Icon(
+                                        Icons.calendar_today,
+                                        size: 18,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -301,7 +340,10 @@ class _HomePageState extends State<HomePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Hora', style: TextStyle(fontWeight: FontWeight.bold)),
+                              const Text(
+                                'Hora',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                               const SizedBox(height: 8),
                               GestureDetector(
                                 onTap: () async {
@@ -316,15 +358,26 @@ class _HomePageState extends State<HomePage> {
                                   }
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                                  decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(15)),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 15,
+                                    vertical: 15,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade100,
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         _horarioSelecionado == null
-                                            ? (tarefa != null ? tarefa.horario : '--:--')
-                                            : _horarioSelecionado!.format(context),
+                                            ? (tarefa != null
+                                                  ? tarefa.horario
+                                                  : '--:--')
+                                            : _horarioSelecionado!.format(
+                                                context,
+                                              ),
                                       ),
                                       const Icon(Icons.access_time, size: 18),
                                     ],
@@ -337,20 +390,44 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                     const SizedBox(height: 25),
-                    const Text('Repetir?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    const Text(
+                      'Repetir?',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                      decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(15)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: _repeticaoSelecionada,
                           items: const [
-                            DropdownMenuItem(value: 'Nunca', child: Text('Nunca')),
-                            DropdownMenuItem(value: 'Diariamente', child: Text('Diariamente')),
-                            DropdownMenuItem(value: 'Semanalmente', child: Text('Semanalmente')),
-                            DropdownMenuItem(value: 'Mensalmente', child: Text('Mensalmente')),
+                            DropdownMenuItem(
+                              value: 'Nunca',
+                              child: Text('Nunca'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Diariamente',
+                              child: Text('Diariamente'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Semanalmente',
+                              child: Text('Semanalmente'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Mensalmente',
+                              child: Text('Mensalmente'),
+                            ),
                           ],
                           onChanged: (value) {
                             modalSetState(() {
@@ -361,7 +438,13 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     const SizedBox(height: 15),
-                    const Text('Tipo', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    const Text(
+                      'Tipo',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
                     const SizedBox(height: 15),
                     Wrap(
                       spacing: 10,
@@ -382,9 +465,18 @@ class _HomePageState extends State<HomePage> {
                         onPressed: () => _salvarTarefa(tarefa),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
                         ),
-                        child: const Text('Salvar Tarefa', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                        child: const Text(
+                          'Salvar Tarefa',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -411,7 +503,9 @@ class _HomePageState extends State<HomePage> {
         decoration: BoxDecoration(
           color: selecionado ? Colors.blue.shade50 : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: selecionado ? Colors.blue : Colors.grey.shade300),
+          border: Border.all(
+            color: selecionado ? Colors.blue : Colors.grey.shade300,
+          ),
         ),
         child: Column(
           children: [
@@ -424,111 +518,171 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  String dataFormatada = DateFormat("EEEE d 'de' MMMM", 'pt_BR').format(DateTime.now());
+  String dataFormatada = DateFormat(
+    "EEEE d 'de' MMMM",
+    'pt_BR',
+  ).format(DateTime.now());
 
   @override
   Widget build(BuildContext context) {
-    final hoje = '${DateTime.now().day.toString().padLeft(2, '0')}/'
+    final hoje =
+        '${DateTime.now().day.toString().padLeft(2, '0')}/'
         '${DateTime.now().month.toString().padLeft(2, '0')}/'
         '${DateTime.now().year}';
 
-    return StreamBuilder<QuerySnapshot>(
-      stream: _userTarefasCollection.snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Scaffold(body: Center(child: Text('Erro ao conectar ao Firebase.')));
-        }
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
-        }
-
-        final todasAsTarefas = snapshot.data!.docs.map((doc) {
-          return Tarefa.fromMap(doc.id, doc.data() as Map<String, dynamic>);
-        }).toList();
-
-        final tarefasFiltradas = todasAsTarefas.where((tarefa) {
-          final mesmaData = tarefa.data == hoje;
-          final mesmaBusca = tarefa.titulo.toLowerCase().contains(_textoBusca);
-          return mesmaData && mesmaBusca;
-        }).toList();
-
-        final concluidasHoje = tarefasFiltradas.where((tarefa) => tarefa.concluida).length;
-        final pendentes = tarefasFiltradas.where((tarefa) => !tarefa.concluida).length;
-
-        return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            toolbarHeight: 220,
-            flexibleSpace: Container(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFF62C982), Color(0xFF23D7CC)],
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        toolbarHeight: 150,
+        flexibleSpace: Container(
+          padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF62C982), Color(0xFF23D7CC)],
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Olá, $_nomeUsuario',
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 5),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Olá, $_nomeUsuario',
-                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                    dataFormatada,
+                    style: const TextStyle(color: Colors.white70),
                   ),
-                  const SizedBox(height: 5),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(dataFormatada, style: const TextStyle(color: Colors.white70)),
-                      GestureDetector(
-                        onTap: () => Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (_) => const LoginPage()),
-                          (route) => false,
-                        ),
-                        child: const Icon(Icons.logout, color: Colors.white, size: 20),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white24,
-                      borderRadius: BorderRadius.circular(15),
+                  GestureDetector(
+                    onTap: () => Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoginPage()),
+                      (route) => false,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Column(
-                          children: [
-                            Text('$concluidasHoje', style: const TextStyle(fontSize: 35, color: Colors.white, fontWeight: FontWeight.bold)),
-                            const Text('Concluídas hoje', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-                          ],
-                        ),
-                        Container(width: 1, height: 30, color: Colors.white),
-                        Column(
-                          children: [
-                            Text('$pendentes', style: const TextStyle(fontSize: 35, color: Colors.orange, fontWeight: FontWeight.bold)),
-                            const Text('Pendentes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-                          ],
-                        ),
-                      ],
+                    child: const Icon(
+                      Icons.logout,
+                      color: Colors.white,
+                      size: 20,
                     ),
                   ),
                 ],
               ),
-            ),
+            ],
           ),
-          body: Column(
+        ),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _userTarefasCollection.snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(child: Text('Erro ao conectar ao Firebase.'));
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final todasAsTarefas = snapshot.data!.docs.map((doc) {
+            return Tarefa.fromMap(doc.id, doc.data() as Map<String, dynamic>);
+          }).toList();
+
+          final tarefasFiltradas = todasAsTarefas.where((tarefa) {
+            final mesmaData = tarefa.data == hoje;
+            final mesmaBusca = tarefa.titulo.toLowerCase().contains(
+              _textoBusca,
+            );
+            return mesmaData && mesmaBusca;
+          }).toList();
+
+          final concluidasHoje = tarefasFiltradas
+              .where((tarefa) => tarefa.concluida)
+              .length;
+          final pendentes = tarefasFiltradas
+              .where((tarefa) => !tarefa.concluida)
+              .length;
+
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xFF23D7CC), Color(0xFF23D7CC)],
+                  ),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            '$concluidasHoje',
+                            style: const TextStyle(
+                              fontSize: 35,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Text(
+                            'Concluídas hoje',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(width: 1, height: 30, color: Colors.white),
+                      Column(
+                        children: [
+                          Text(
+                            '$pendentes',
+                            style: const TextStyle(
+                              fontSize: 35,
+                              color: Colors.orange,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Text(
+                            'Pendentes',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               GestureDetector(
                 onTap: () async {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => PageVinculo(tipoUsuario: _tipoUsuario)),
+                    MaterialPageRoute(
+                      builder: (_) => PageVinculo(tipoUsuario: _tipoUsuario),
+                    ),
                   );
                   _carregarUsuario();
                 },
@@ -536,28 +690,43 @@ class _HomePageState extends State<HomePage> {
                   margin: const EdgeInsets.fromLTRB(15, 10, 15, 10),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: _nomeVinculado != null ? Colors.green.shade100 : Colors.orange.shade100,
+                    color: _nomeVinculado != null
+                        ? Colors.green.shade100
+                        : Colors.orange.shade100,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _nomeVinculado != null ? Colors.green.shade300 : Colors.orange.shade300),
+                    border: Border.all(
+                      color: _nomeVinculado != null
+                          ? Colors.green.shade300
+                          : Colors.orange.shade300,
+                    ),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         _nomeVinculado != null ? Icons.link : Icons.link_off,
-                        color: _nomeVinculado != null ? Colors.green : Colors.orange,
+                        color: _nomeVinculado != null
+                            ? Colors.green
+                            : Colors.orange,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(_nomeVinculado != null ? 'Conectado' : 'Nenhum vínculo', style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Text(
+                              _nomeVinculado != null
+                                  ? 'Conectado'
+                                  : 'Nenhum vínculo',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             Text(
                               _nomeVinculado != null
                                   ? 'Vinculado a $_nomeVinculado'
                                   : (_tipoUsuario == 'idoso'
-                                      ? 'Toque para gerar um código de vínculo'
-                                      : 'Toque para inserir o código do idoso'),
+                                        ? 'Toque para gerar um código de vínculo'
+                                        : 'Toque para inserir o código do idoso'),
                             ),
                           ],
                         ),
@@ -568,7 +737,10 @@ class _HomePageState extends State<HomePage> {
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: Text('Para fazer hoje', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25)),
+                child: Text(
+                  'Para fazer hoje',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+                ),
               ),
               Expanded(
                 child: tarefasFiltradas.isEmpty
@@ -579,21 +751,28 @@ class _HomePageState extends State<HomePage> {
                           final tarefa = tarefasFiltradas[index];
 
                           return Card(
-                            margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 15,
+                              vertical: 6,
+                            ),
                             child: Padding(
                               padding: const EdgeInsets.all(16),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Transform.scale(
                                         scale: 1.5,
                                         child: Checkbox(
                                           value: tarefa.concluida,
                                           onChanged: (value) {
-                                            _alternarStatusTarefa(tarefa, value ?? false);
+                                            _alternarStatusTarefa(
+                                              tarefa,
+                                              value ?? false,
+                                            );
                                           },
                                           shape: const CircleBorder(),
                                           activeColor: Colors.green,
@@ -601,18 +780,40 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       ),
                                       Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(tarefa.titulo, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-                                            const SizedBox(height: 4),
-                                            Text(tarefa.descricao, style: TextStyle(color: Colors.grey[600], fontSize: 16)),
-                                          ],
+                                        child: GestureDetector(
+                                          onTap: () =>
+                                              _mostrarFormulario(tarefa),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                tarefa.titulo,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 20,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                tarefa.descricao,
+                                                style: TextStyle(
+                                                  color: Colors.grey[600],
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                       IconButton(
-                                        icon: const Icon(Icons.delete_outline, color: Colors.grey, size: 35),
-                                        onPressed: () => _excluirTarefa(tarefa.id!),
+                                        icon: const Icon(
+                                          Icons.delete_outline,
+                                          color: Colors.grey,
+                                          size: 35,
+                                        ),
+                                        onPressed: () =>
+                                            _excluirTarefa(tarefa.id!),
                                       ),
                                     ],
                                   ),
@@ -622,19 +823,54 @@ class _HomePageState extends State<HomePage> {
                                     child: Row(
                                       children: [
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                          decoration: BoxDecoration(color: Colors.orange.withOpacity(0.2), borderRadius: BorderRadius.circular(20)),
-                                          child: Text(tarefa.tipo, style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 16)),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.orange.withOpacity(
+                                              0.2,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            tarefa.tipo,
+                                            style: const TextStyle(
+                                              color: Colors.orange,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                          ),
                                         ),
                                         const SizedBox(width: 10),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                          decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(20)),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade200,
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                          ),
                                           child: Row(
                                             children: [
-                                              const Icon(Icons.access_time, size: 16, color: Colors.grey),
+                                              const Icon(
+                                                Icons.access_time,
+                                                size: 16,
+                                                color: Colors.grey,
+                                              ),
                                               const SizedBox(width: 4),
-                                              Text(tarefa.horario, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black54)),
+                                              Text(
+                                                tarefa.horario,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black54,
+                                                ),
+                                              ),
                                             ],
                                           ),
                                         ),
@@ -649,26 +885,25 @@ class _HomePageState extends State<HomePage> {
                       ),
               ),
             ],
-          ),
-          floatingActionButton: Container(
-            padding: const EdgeInsets.only(bottom: 15),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: FloatingActionButton.extended(
-                onPressed: () => _mostrarFormulario(),
-                icon: const Icon(Icons.add),
-                label: const Text(' Adicionar tarefa', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                backgroundColor: const Color.fromARGB(255, 62, 172, 111),
-                foregroundColor: Colors.white,
-              ),
+          );
+        },
+      ),
+      floatingActionButton: Container(
+        padding: const EdgeInsets.only(bottom: 15),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: FloatingActionButton.extended(
+            onPressed: () => _mostrarFormulario(),
+            icon: const Icon(Icons.add),
+            label: const Text(
+              ' Adicionar tarefa',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
+            backgroundColor: const Color.fromARGB(255, 62, 172, 111),
+            foregroundColor: Colors.white,
           ),
-          bottomNavigationBar: NavBar(
-            currentIndex: 0,
-            onTap: (index) => navigateByIndex(context, 0, index),
-          ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
