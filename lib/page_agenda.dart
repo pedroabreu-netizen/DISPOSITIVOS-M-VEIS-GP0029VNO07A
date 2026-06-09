@@ -66,6 +66,8 @@ class _PageAgendaState extends State<PageAgenda> {
     if (_tituloController.text.isEmpty || _descricaoController.text.isEmpty) {
       return;
     }
+    final usuarioAtual = FirebaseAuth.instance.currentUser;
+    final emailUsuario = usuarioAtual?.email ?? 'errado';
 
     final dataAlvo = _dataSelecionada ?? _diaSelecionado;
     final dataString =
@@ -85,6 +87,7 @@ class _PageAgendaState extends State<PageAgenda> {
       tipo: _tipoSelecionado,
       data: dataString,
       repeticao: _repeticaoSelecionada,
+      criadoPor: emailUsuario,
     );
 
     if (tarefaExistente == null) {

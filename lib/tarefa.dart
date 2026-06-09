@@ -1,5 +1,5 @@
 class Tarefa {
-  String? id; // Adicionado: ID do documento no Firestore
+  String? id;
   String titulo;
   String descricao;
   bool concluida;
@@ -7,6 +7,7 @@ class Tarefa {
   String tipo;
   String data;
   String repeticao;
+  String criadoPor;
 
   Tarefa({
     this.id,
@@ -17,9 +18,9 @@ class Tarefa {
     required this.tipo,
     required this.data,
     required this.repeticao,
+    this.criadoPor = '',
   });
 
-  /// Converte para Map para salvar no Firestore
   Map<String, dynamic> toMap() {
     return {
       'titulo': titulo,
@@ -29,10 +30,10 @@ class Tarefa {
       'tipo': tipo,
       'data': data,
       'repeticao': repeticao,
+      'criado_por': criadoPor,
     };
   }
 
-  /// Converte de Map (Firestore) para objeto Tarefa
   factory Tarefa.fromMap(String documentId, Map<String, dynamic> map) {
     return Tarefa(
       id: documentId,
@@ -43,6 +44,7 @@ class Tarefa {
       tipo: map['tipo'] ?? '',
       data: map['data'] ?? '',
       repeticao: map['repeticao'] ?? '',
+      criadoPor: map['criado_por'] ?? '',
     );
   }
 }

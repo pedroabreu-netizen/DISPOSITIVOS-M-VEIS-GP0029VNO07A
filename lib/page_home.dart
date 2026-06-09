@@ -97,6 +97,8 @@ class _HomePageState extends State<HomePage> {
         _tipoSelecionado.isEmpty) {
       return;
     }
+    final usuarioAtual = FirebaseAuth.instance.currentUser;
+    final emailUsuario = usuarioAtual?.email ?? 'errado';
 
     final horarioString = _horarioSelecionado == null
         ? (tarefaExistente != null ? tarefaExistente.horario : '00:00')
@@ -116,6 +118,7 @@ class _HomePageState extends State<HomePage> {
       tipo: _tipoSelecionado,
       data: dataString,
       repeticao: _repeticaoSelecionada,
+      criadoPor: emailUsuario,
     );
 
     if (tarefaExistente == null) {

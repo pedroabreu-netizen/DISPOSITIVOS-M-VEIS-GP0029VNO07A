@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -54,6 +55,8 @@ class _PageNotasState extends State<PageNotas> {
 
   Future<void> _salvarNota(String? id) async {
     if (_tituloController.text.trim().isEmpty) return;
+    final usuarioAtual = FirebaseAuth.instance.currentUser;
+    final emailUsuario = usuarioAtual?.email ?? 'errado';
 
     final tags = _selectedCategorias.isNotEmpty
         ? _selectedCategorias.toList()
@@ -75,6 +78,7 @@ class _PageNotasState extends State<PageNotas> {
       tags: tags,
       data: dataNota,
       concluida: false,
+      criadoPor: emailUsuario,
     );
 
     if (id == null) {
