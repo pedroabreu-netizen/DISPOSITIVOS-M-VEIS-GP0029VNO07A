@@ -86,6 +86,9 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
+    final usuarioAtual = FirebaseAuth.instance.currentUser;
+    final emailUsuario = usuarioAtual?.email ?? '';
+
     final dataString = _dataSelecionada == null
         ? (tarefaExistente != null ? tarefaExistente.data : '')
         : '${_dataSelecionada!.day.toString().padLeft(2, '0')}/'
@@ -110,6 +113,8 @@ class _HomePageState extends State<HomePage> {
       data: dataString,
 
       repeticao: _repeticaoSelecionada,
+
+      criadoPor: emailUsuario,
     );
 
     if (tarefaExistente == null) {

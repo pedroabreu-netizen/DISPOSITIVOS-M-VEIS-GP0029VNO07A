@@ -1,5 +1,6 @@
 class Tarefa {
-  String? id; // O ID do documento no Firestore (nulo quando a tarefa acabou de ser criada localmente)
+  String?
+  id; // O ID do documento no Firestore (nulo quando a tarefa acabou de ser criada localmente)
   String titulo;
   String descricao;
   bool concluida;
@@ -7,6 +8,7 @@ class Tarefa {
   String tipo;
   String data;
   String repeticao;
+  String criadoPor;
 
   Tarefa({
     this.id,
@@ -17,6 +19,7 @@ class Tarefa {
     required this.tipo,
     required this.data,
     required this.repeticao,
+    this.criadoPor = '',
   });
 
   /// converter o objeto tarefa em um Map para ser salvo no Firestore
@@ -29,6 +32,7 @@ class Tarefa {
       'tipo': tipo,
       'data': data,
       'repeticao': repeticao,
+      'criado_por': criadoPor,
     };
   }
 
@@ -42,6 +46,7 @@ class Tarefa {
       tipo: map['tipo'] ?? '',
       data: map['data'] ?? '',
       repeticao: map['repeticao'] ?? '',
+      criadoPor: map['criado_por'] ?? '',
     );
   }
 }

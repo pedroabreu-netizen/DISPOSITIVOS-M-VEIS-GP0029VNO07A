@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart'; 
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'navigation/nav_index.dart';
 import 'page_login.dart';
-import 'tarefa.dart'; 
+import 'tarefa.dart';
 import 'widgets/nav_bar.dart';
 
 class PageAgenda extends StatefulWidget {
@@ -17,7 +17,6 @@ class PageAgenda extends StatefulWidget {
 }
 
 class _PageAgendaState extends State<PageAgenda> {
-
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _descricaoController = TextEditingController();
   final TextEditingController _buscaController = TextEditingController();
@@ -51,7 +50,8 @@ class _PageAgendaState extends State<PageAgenda> {
 
   /// aqui o getter que aponta para a subcoleção NoSQL isolada do usuário autenticado
   CollectionReference get _userTarefasCollection {
-    final String userId = FirebaseAuth.instance.currentUser?.uid ?? 'usuario_anonimo';
+    final String userId =
+        FirebaseAuth.instance.currentUser?.uid ?? 'usuario_anonimo';
     return FirebaseFirestore.instance
         .collection('usuarios')
         .doc(userId)
@@ -64,8 +64,12 @@ class _PageAgendaState extends State<PageAgenda> {
       return;
     }
 
+    final usuarioAtual = FirebaseAuth.instance.currentUser;
+    final emailUsuario = usuarioAtual?.email ?? '';
+
     final dataAlvo = _dataSelecionada ?? _diaSelecionado;
-    final dataString = '${dataAlvo.day.toString().padLeft(2, '0')}/'
+    final dataString =
+        '${dataAlvo.day.toString().padLeft(2, '0')}/'
         '${dataAlvo.month.toString().padLeft(2, '0')}/'
         '${dataAlvo.year}';
 
@@ -81,6 +85,7 @@ class _PageAgendaState extends State<PageAgenda> {
       tipo: _tipoSelecionado,
       data: dataString,
       repeticao: _repeticaoSelecionada,
+      criadoPor: emailUsuario,
     );
 
     if (tarefaExistente == null) {
@@ -88,7 +93,9 @@ class _PageAgendaState extends State<PageAgenda> {
       await _userTarefasCollection.add(novaTarefa.toMap());
     } else {
       // OPERAÇÃO: UPDATE
-      await _userTarefasCollection.doc(tarefaExistente.id).update(novaTarefa.toMap());
+      await _userTarefasCollection
+          .doc(tarefaExistente.id)
+          .update(novaTarefa.toMap());
     }
 
     _tituloController.clear();
@@ -106,7 +113,8 @@ class _PageAgendaState extends State<PageAgenda> {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmar exclusão', 
+        title: const Text(
+          'Confirmar exclusão',
           style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
         content: const Text(
@@ -138,9 +146,7 @@ class _PageAgendaState extends State<PageAgenda> {
 
   /// alterna o status do checkbox mudando apenas o campo 'concluida' no Firestore
   Future<void> _alternarStatusTarefa(Tarefa tarefa, bool valor) async {
-    await _userTarefasCollection.doc(tarefa.id).update({
-      'concluida': valor,
-    });
+    await _userTarefasCollection.doc(tarefa.id).update({'concluida': valor});
   }
 
   void _mostrarFormulario([Tarefa? tarefa]) {
@@ -186,7 +192,10 @@ class _PageAgendaState extends State<PageAgenda> {
                       children: [
                         Text(
                           tarefa == null ? 'Nova Tarefa' : 'Editar Tarefa',
-                          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         CircleAvatar(
                           backgroundColor: Colors.grey.shade200,
@@ -198,7 +207,13 @@ class _PageAgendaState extends State<PageAgenda> {
                       ],
                     ),
                     const SizedBox(height: 25),
-                    const Text('O que é?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    const Text(
+                      'O que é?',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
                     const SizedBox(height: 10),
                     TextField(
                       controller: _tituloController,
@@ -213,7 +228,13 @@ class _PageAgendaState extends State<PageAgenda> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Text('Detalhes (opcional)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    const Text(
+                      'Detalhes (opcional)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
                     const SizedBox(height: 10),
                     TextField(
                       controller: _descricaoController,
@@ -235,13 +256,17 @@ class _PageAgendaState extends State<PageAgenda> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Data', style: TextStyle(fontWeight: FontWeight.bold)),
+                              const Text(
+                                'Data',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                               const SizedBox(height: 8),
                               GestureDetector(
                                 onTap: () async {
                                   final data = await showDatePicker(
                                     context: context,
-                                    initialDate: _dataSelecionada ?? _diaSelecionado,
+                                    initialDate:
+                                        _dataSelecionada ?? _diaSelecionado,
                                     firstDate: DateTime(2020),
                                     lastDate: DateTime(2030),
                                   );
@@ -252,20 +277,30 @@ class _PageAgendaState extends State<PageAgenda> {
                                   }
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 15,
+                                    vertical: 15,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.grey.shade100,
                                     borderRadius: BorderRadius.circular(15),
                                   ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         _dataSelecionada == null
-                                            ? (tarefa != null && tarefa.data.isNotEmpty ? tarefa.data : 'Selecionar')
+                                            ? (tarefa != null &&
+                                                      tarefa.data.isNotEmpty
+                                                  ? tarefa.data
+                                                  : 'Selecionar')
                                             : '${_dataSelecionada!.day.toString().padLeft(2, '0')}/${_dataSelecionada!.month.toString().padLeft(2, '0')}/${_dataSelecionada!.year}',
                                       ),
-                                      const Icon(Icons.calendar_today, size: 18),
+                                      const Icon(
+                                        Icons.calendar_today,
+                                        size: 18,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -278,7 +313,10 @@ class _PageAgendaState extends State<PageAgenda> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Hora', style: TextStyle(fontWeight: FontWeight.bold)),
+                              const Text(
+                                'Hora',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                               const SizedBox(height: 8),
                               GestureDetector(
                                 onTap: () async {
@@ -293,18 +331,26 @@ class _PageAgendaState extends State<PageAgenda> {
                                   }
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 15,
+                                    vertical: 15,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.grey.shade100,
                                     borderRadius: BorderRadius.circular(15),
                                   ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         _horarioSelecionado == null
-                                            ? (tarefa != null ? tarefa.horario : '--:--')
-                                            : _horarioSelecionado!.format(context),
+                                            ? (tarefa != null
+                                                  ? tarefa.horario
+                                                  : '--:--')
+                                            : _horarioSelecionado!.format(
+                                                context,
+                                              ),
                                       ),
                                       const Icon(Icons.access_time, size: 18),
                                     ],
@@ -317,11 +363,20 @@ class _PageAgendaState extends State<PageAgenda> {
                       ],
                     ),
                     const SizedBox(height: 25),
-                    const Text('Repetir?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    const Text(
+                      'Repetir?',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(15),
@@ -330,10 +385,22 @@ class _PageAgendaState extends State<PageAgenda> {
                         child: DropdownButton<String>(
                           value: _repeticaoSelecionada,
                           items: const [
-                            DropdownMenuItem(value: 'Nunca', child: Text('Nunca')),
-                            DropdownMenuItem(value: 'Diariamente', child: Text('Diariamente')),
-                            DropdownMenuItem(value: 'Semanalmente', child: Text('Semanalmente')),
-                            DropdownMenuItem(value: 'Mensalmente', child: Text('Mensalmente')),
+                            DropdownMenuItem(
+                              value: 'Nunca',
+                              child: Text('Nunca'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Diariamente',
+                              child: Text('Diariamente'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Semanalmente',
+                              child: Text('Semanalmente'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Mensalmente',
+                              child: Text('Mensalmente'),
+                            ),
                           ],
                           onChanged: (value) {
                             modalSetState(() {
@@ -344,7 +411,13 @@ class _PageAgendaState extends State<PageAgenda> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Text('Tipo', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    const Text(
+                      'Tipo',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
                     const SizedBox(height: 15),
                     Wrap(
                       spacing: 10,
@@ -365,11 +438,17 @@ class _PageAgendaState extends State<PageAgenda> {
                         onPressed: () => _salvarTarefa(tarefa),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
                         ),
                         child: const Text(
                           'Salvar Tarefa',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -397,7 +476,9 @@ class _PageAgendaState extends State<PageAgenda> {
         decoration: BoxDecoration(
           color: selecionado ? Colors.blue.shade50 : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: selecionado ? Colors.blue : Colors.grey.shade300),
+          border: Border.all(
+            color: selecionado ? Colors.blue : Colors.grey.shade300,
+          ),
         ),
         child: Column(
           children: [
@@ -413,7 +494,8 @@ class _PageAgendaState extends State<PageAgenda> {
   @override
   Widget build(BuildContext context) {
     // formata a data atual selecionada no calendário para bater com o padrão de Strings NoSQL (DD/MM/AAAA)
-    final stringDiaSelecionado = '${_diaSelecionado.day.toString().padLeft(2, '0')}/'
+    final stringDiaSelecionado =
+        '${_diaSelecionado.day.toString().padLeft(2, '0')}/'
         '${_diaSelecionado.month.toString().padLeft(2, '0')}/'
         '${_diaSelecionado.year}';
 
@@ -421,10 +503,14 @@ class _PageAgendaState extends State<PageAgenda> {
       stream: _userTarefasCollection.snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Scaffold(body: Center(child: Text('Erro ao conectar ao Firebase.')));
+          return const Scaffold(
+            body: Center(child: Text('Erro ao conectar ao Firebase.')),
+          );
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         // converte os documentos em instâncias da classe Tarefa
@@ -469,7 +555,11 @@ class _PageAgendaState extends State<PageAgenda> {
                 children: [
                   Text(
                     'Minha Agenda',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   SizedBox(height: 5),
                   Text(
@@ -501,7 +591,8 @@ class _PageAgendaState extends State<PageAgenda> {
                     firstDay: DateTime.utc(2020, 1, 1),
                     lastDay: DateTime.utc(2035, 12, 31),
                     focusedDay: _diaFocado,
-                    selectedDayPredicate: (day) => isSameDay(_diaSelecionado, day),
+                    selectedDayPredicate: (day) =>
+                        isSameDay(_diaSelecionado, day),
                     onDaySelected: (selectedDay, focusedDay) {
                       setState(() {
                         _diaSelecionado = selectedDay;
@@ -513,24 +604,42 @@ class _PageAgendaState extends State<PageAgenda> {
                     headerStyle: HeaderStyle(
                       titleCentered: true,
                       formatButtonVisible: false,
-                      titleTextStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      titleTextStyle: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                       leftChevronIcon: Container(
                         padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          shape: BoxShape.circle,
+                        ),
                         child: const Icon(Icons.chevron_left, size: 20),
                       ),
                       rightChevronIcon: Container(
                         padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          shape: BoxShape.circle,
+                        ),
                         child: const Icon(Icons.chevron_right, size: 20),
                       ),
                     ),
                     calendarStyle: CalendarStyle(
                       defaultTextStyle: const TextStyle(fontSize: 16),
                       weekendTextStyle: const TextStyle(fontSize: 16),
-                      outsideTextStyle: TextStyle(color: Colors.grey.shade400, fontSize: 16),
-                      todayDecoration: BoxDecoration(color: Colors.green.shade300, shape: BoxShape.circle),
-                      selectedDecoration: const BoxDecoration(color: Color(0xFF70D6C2), shape: BoxShape.circle),
+                      outsideTextStyle: TextStyle(
+                        color: Colors.grey.shade400,
+                        fontSize: 16,
+                      ),
+                      todayDecoration: BoxDecoration(
+                        color: Colors.green.shade300,
+                        shape: BoxShape.circle,
+                      ),
+                      selectedDecoration: const BoxDecoration(
+                        color: Color(0xFF70D6C2),
+                        shape: BoxShape.circle,
+                      ),
                       cellMargin: const EdgeInsets.all(6),
                     ),
                     daysOfWeekStyle: const DaysOfWeekStyle(
@@ -548,7 +657,10 @@ class _PageAgendaState extends State<PageAgenda> {
                   children: [
                     const Text(
                       'Compromissos',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30,
+                      ),
                     ),
                     ElevatedButton(
                       onPressed: () => _mostrarFormulario(),
@@ -556,9 +668,14 @@ class _PageAgendaState extends State<PageAgenda> {
                         backgroundColor: const Color(0xFF63D49C),
                         foregroundColor: Colors.white,
                         elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
-                      child: const Text('+ Adicionar', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        '+ Adicionar',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ],
                 ),
@@ -566,14 +683,19 @@ class _PageAgendaState extends State<PageAgenda> {
               const SizedBox(height: 10),
               Expanded(
                 child: tarefasFiltradas.isEmpty
-                    ? const Center(child: Text("Nenhuma tarefa cadastrada para este dia."))
+                    ? const Center(
+                        child: Text("Nenhuma tarefa cadastrada para este dia."),
+                      )
                     : ListView.builder(
                         itemCount: tarefasFiltradas.length,
                         itemBuilder: (context, index) {
                           final tarefa = tarefasFiltradas[index];
 
                           return Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
                               color: Colors.white,
@@ -590,30 +712,44 @@ class _PageAgendaState extends State<PageAgenda> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 GestureDetector(
-                                  onTap: () => _alternarStatusTarefa(tarefa, !tarefa.concluida),
+                                  onTap: () => _alternarStatusTarefa(
+                                    tarefa,
+                                    !tarefa.concluida,
+                                  ),
                                   child: Container(
                                     width: 28,
                                     height: 28,
                                     margin: const EdgeInsets.only(top: 4),
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: tarefa.concluida ? const Color(0xFF63D49C) : Colors.transparent,
+                                      color: tarefa.concluida
+                                          ? const Color(0xFF63D49C)
+                                          : Colors.transparent,
                                       border: Border.all(
-                                        color: tarefa.concluida ? const Color(0xFF63D49C) : Colors.grey.shade400,
+                                        color: tarefa.concluida
+                                            ? const Color(0xFF63D49C)
+                                            : Colors.grey.shade400,
                                         width: 2,
                                       ),
                                     ),
                                     child: tarefa.concluida
-                                        ? const Icon(Icons.check, size: 16, color: Colors.white)
+                                        ? const Icon(
+                                            Icons.check,
+                                            size: 16,
+                                            color: Colors.white,
+                                          )
                                         : null,
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: GestureDetector(
-                                    onTap: () => _mostrarFormulario(tarefa), // Abre em modo de edição
+                                    onTap: () => _mostrarFormulario(
+                                      tarefa,
+                                    ), // Abre em modo de edição
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           tarefa.titulo,
@@ -626,16 +762,24 @@ class _PageAgendaState extends State<PageAgenda> {
                                         const SizedBox(height: 6),
                                         Text(
                                           tarefa.descricao,
-                                          style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.grey.shade600,
+                                          ),
                                         ),
                                         const SizedBox(height: 14),
                                         Row(
                                           children: [
                                             Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                    vertical: 6,
+                                                  ),
                                               decoration: BoxDecoration(
                                                 color: const Color(0xFFFFF0DD),
-                                                borderRadius: BorderRadius.circular(20),
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
                                               ),
                                               child: Text(
                                                 tarefa.tipo,
@@ -647,18 +791,29 @@ class _PageAgendaState extends State<PageAgenda> {
                                             ),
                                             const SizedBox(width: 10),
                                             Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                    vertical: 6,
+                                                  ),
                                               decoration: BoxDecoration(
                                                 color: const Color(0xFFEAEAEA),
-                                                borderRadius: BorderRadius.circular(20),
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
                                               ),
                                               child: Row(
                                                 children: [
-                                                  const Icon(Icons.access_time, size: 16),
+                                                  const Icon(
+                                                    Icons.access_time,
+                                                    size: 16,
+                                                  ),
                                                   const SizedBox(width: 4),
                                                   Text(
                                                     tarefa.horario,
-                                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
                                                   ),
                                                 ],
                                               ),
@@ -671,7 +826,10 @@ class _PageAgendaState extends State<PageAgenda> {
                                 ),
                                 IconButton(
                                   onPressed: () => _excluirTarefa(tarefa.id!),
-                                  icon: Icon(Icons.delete_outline, color: Colors.grey.shade500),
+                                  icon: Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.grey.shade500,
+                                  ),
                                 ),
                               ],
                             ),
