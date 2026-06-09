@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-
+import 'package:firebase_auth/firebase_auth.dart'; 
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -54,31 +53,62 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
     super.dispose();
   }
 
+  // método _handleSendEmail atualizado com a lógica do Firebase
   Future<void> _handleSendEmail() async {
-    if (_emailController.text.isEmpty ||
-        !_emailController.text.contains('@')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Por favor, insira um e-mail válido.'),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      );
+    final email = _emailController.text.trim();
+
+    // validação básica local
+    if (email.isEmpty || !email.contains('@')) {
+      _showSnackBar('Por favor, insira um e-mail válido.', Colors.redAccent);
       return;
     }
 
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2)); // Simula chamada de API
-    setState(() {
-      _isLoading = false;
-      _emailSent = true;
-    });
 
-    _animationController.reset();
-    _animationController.forward();
+    try {
+      // chamada ao Firebase Authentication
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+      setState(() {
+        _isLoading = false;
+        _emailSent = true;
+      });
+
+      _animationController.reset();
+      _animationController.forward();
+      
+    } on FirebaseAuthException catch (e) {
+      setState(() => _isLoading = false);
+      
+      // tratamento dos erros mais comuns 
+      String errorMessage = 'Ocorreu um erro ao tentar enviar o e-mail.';
+      
+      if (e.code == 'user-not-found') {
+        errorMessage = 'Este e-mail não está cadastrado no sistema.';
+      } else if (e.code == 'invalid-email') {
+        errorMessage = 'O formato do e-mail digitado é inválido.';
+      } else if (e.code == 'too-many-requests') {
+        errorMessage = 'Muitas tentativas seguidas. Tente novamente mais tarde.';
+      }
+
+      _showSnackBar(errorMessage, Colors.redAccent);
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _showSnackBar('Erro inesperado: ${e.toString()}', Colors.redAccent);
+    }
+  }
+
+  void _showSnackBar(String message, Color bgColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: bgColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
   }
 
   @override
@@ -156,7 +186,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Ícone ilustrativo
           Container(
             width: 80,
             height: 80,
@@ -173,8 +202,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             ),
           ),
           const SizedBox(height: 24),
-
-          // Título
           const Text(
             'Esqueceu a senha?',
             style: TextStyle(
@@ -186,8 +213,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 10),
-
-          // Subtítulo
           Text(
             'Informe seu e-mail cadastrado para redefinir sua senha.',
             style: TextStyle(
@@ -198,8 +223,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
-
-          // Campo de e-mail
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
@@ -214,12 +237,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
           const SizedBox(height: 8),
           _buildEmailField(),
           const SizedBox(height: 28),
-
-          // Botão principal
           _buildSendButton(),
           const SizedBox(height: 20),
-
-          // Link voltar ao login
           GestureDetector(
             onTap: () => Navigator.of(context).maybePop(),
             child: RichText(
@@ -321,8 +340,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                   height: 22,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 )
               : const Text(
@@ -356,7 +374,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Ícone de sucesso
           Container(
             width: 88,
             height: 88,
@@ -380,7 +397,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             ),
           ),
           const SizedBox(height: 28),
-
           const Text(
             'E-mail enviado!',
             style: TextStyle(
@@ -392,7 +408,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
-
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
@@ -402,8 +417,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                 height: 1.6,
               ),
               children: [
-                const TextSpan(
-                    text: 'Enviamos as instruções para '),
+                const TextSpan(text: 'Enviamos as instruções para '),
                 TextSpan(
                   text: _emailController.text,
                   style: const TextStyle(
@@ -412,14 +426,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                   ),
                 ),
                 const TextSpan(
-                    text:
-                        '. Verifique sua caixa de entrada e a pasta de spam.'),
+                    text: '. Verifique sua caixa de entrada e a pasta de spam.'),
               ],
             ),
           ),
           const SizedBox(height: 36),
-
-          // Botão voltar ao login
           SizedBox(
             width: double.infinity,
             height: 54,
@@ -459,13 +470,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             ),
           ),
           const SizedBox(height: 18),
-
-          // Reenviar e-mail
           GestureDetector(
+            // clicando em reenviar, ele limpa o estado de sucesso e chama a função de envio novamente de forma automática
             onTap: () {
               setState(() => _emailSent = false);
-              _animationController.reset();
-              _animationController.forward();
+              _handleSendEmail(); 
             },
             child: Text(
               'Não recebeu? Reenviar e-mail',
