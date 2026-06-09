@@ -1,21 +1,29 @@
 import 'package:flutter/material.dart';
 
 enum CategoriaArquivo {
-  exame('Exame', 'Exame', Icons.science_outlined),
-  prescricao('Prescrição', 'Prescrição', Icons.medication_outlined),
-  laudo('Laudo', 'Laudo', Icons.description_outlined),
-  receita('Receita', 'Receita Médica', Icons.receipt_long_outlined),
-  outros('Outros', 'Outros', Icons.folder_outlined);
+  exame,
+  prescricao,
+  laudo,
+  receita,
+  outros;
 
-  const CategoriaArquivo(this.label, this.chipLabel, this.icon);
+  String get label => switch (this) {
+        CategoriaArquivo.exame       => 'Exame',
+        CategoriaArquivo.prescricao  => 'Prescrição',
+        CategoriaArquivo.laudo       => 'Laudo',
+        CategoriaArquivo.receita     => 'Receita',
+        CategoriaArquivo.outros      => 'Outros',
+      };
 
-  /// Label curto — usado no badge do card
-  final String label;
+  String get chipLabel => label;
 
-  /// Label completo — usado nos chips de filtro
-  final String chipLabel;
-
-  final IconData icon;
+  IconData get icon => switch (this) {
+        CategoriaArquivo.exame       => Icons.biotech_outlined,
+        CategoriaArquivo.prescricao  => Icons.medication_outlined,
+        CategoriaArquivo.laudo       => Icons.description_outlined,
+        CategoriaArquivo.receita     => Icons.receipt_long_outlined,
+        CategoriaArquivo.outros      => Icons.folder_outlined,
+      };
 }
 
 class ArquivoMedico {
@@ -25,8 +33,16 @@ class ArquivoMedico {
   final DateTime dataUpload;
   final int tamanhoBytes;
   final String extensao;
+
+  // Campos para integração com Firebase:
+  // downloadUrl — URL pública do arquivo no Firebase Storage
+  // nomeNoStorage — nome com que o arquivo foi salvo no Storage,
+  //                 necessário para deletá-lo posteriormente
+  final String? downloadUrl;
+  final String? nomeNoStorage;
+
+  // Mantido por compatibilidade com o código original (não usado no Firebase)
   final String? caminhoLocal;
-  final String? urlRemota;
 
   const ArquivoMedico({
     required this.id,
@@ -35,64 +51,17 @@ class ArquivoMedico {
     required this.dataUpload,
     required this.tamanhoBytes,
     required this.extensao,
+    this.downloadUrl,
+    this.nomeNoStorage,
     this.caminhoLocal,
-    this.urlRemota,
   });
 
   String get tamanhoFormatado {
-    if (tamanhoBytes < 1024) return '$tamanhoBytes B';
-    if (tamanhoBytes < 1024 * 1024) {
-      return '${(tamanhoBytes / 1024).toStringAsFixed(1)} KB';
+    if (tamanhoBytes >= 1024 * 1024) {
+      return '${(tamanhoBytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    } else if (tamanhoBytes >= 1024) {
+      return '${(tamanhoBytes / 1024).toStringAsFixed(0)} KB';
     }
-    return '${(tamanhoBytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-  }
-
-  factory ArquivoMedico.fromJson(Map<String, dynamic> json) {
-    return ArquivoMedico(
-      id: json['id'] as String,
-      nome: json['nome'] as String,
-      categoria: CategoriaArquivo.values.firstWhere(
-        (e) => e.name == json['categoria'] as String,
-        orElse: () => CategoriaArquivo.outros,
-      ),
-      dataUpload: DateTime.parse(json['dataUpload'] as String),
-      tamanhoBytes: json['tamanhoBytes'] as int,
-      extensao: json['extensao'] as String,
-      caminhoLocal: json['caminhoLocal'] as String?,
-      urlRemota: json['urlRemota'] as String?,
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'nome': nome,
-        'categoria': categoria.name,
-        'dataUpload': dataUpload.toIso8601String(),
-        'tamanhoBytes': tamanhoBytes,
-        'extensao': extensao,
-        if (caminhoLocal != null) 'caminhoLocal': caminhoLocal,
-        if (urlRemota != null) 'urlRemota': urlRemota,
-      };
-
-  ArquivoMedico copyWith({
-    String? id,
-    String? nome,
-    CategoriaArquivo? categoria,
-    DateTime? dataUpload,
-    int? tamanhoBytes,
-    String? extensao,
-    String? caminhoLocal,
-    String? urlRemota,
-  }) {
-    return ArquivoMedico(
-      id: id ?? this.id,
-      nome: nome ?? this.nome,
-      categoria: categoria ?? this.categoria,
-      dataUpload: dataUpload ?? this.dataUpload,
-      tamanhoBytes: tamanhoBytes ?? this.tamanhoBytes,
-      extensao: extensao ?? this.extensao,
-      caminhoLocal: caminhoLocal ?? this.caminhoLocal,
-      urlRemota: urlRemota ?? this.urlRemota,
-    );
+    return '$tamanhoBytes B';
   }
 }
