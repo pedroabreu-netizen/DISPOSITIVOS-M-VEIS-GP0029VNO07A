@@ -9,6 +9,6 @@ Cada membro ficou com um "fluxo" específico do app, sendo as tasks respectivas 
 | João Victor Prado | Front - Telas relacionadas ao fluxo de Agenda (Agenda Cuidador, Agenda Idoso, Overlay tarefas na tela Agenda)| Back - Autenticação por E-mail e Senha pelo firebase, método de recuperação de senha pelo "Esqueci a senha" |   https://drive.google.com/file/d/1WKdFHJiCLjyXxNZqwq3WutoB3pcK3Udb/view?usp=sharing
 | Guilherme Lobo brayner | Telas relacionadas ao fluxo Notas (Tela Notas, Modal de criação de Notas) | Back - Inclusão do campo obrigatório criado_por, registrando o usuário responsável pelo cadastro dos dados. | https://drive.google.com/file/d/1kCK6KscNsXX3kdr64WrfjAM5GP4sSxCo/view?usp=sharing 
 | Flávia Monique | Front - telas inicial, cadastro de atividades e visualização das atividades | Back - Validação de dominio @souunit.com.br, armazenamento das informações de cadastro no firebase |  https://drive.google.com/file/d/1r9SyaHyaQxjlaTPizDAOQIz43C4sQqMh/view?usp=sharing |
-| João Luís | Telas relacionadas ao fluxo de login e cadastro |   
+| João Luís | Telas relacionadas ao fluxo de login e cadastro | Back - Autenticaçåo por Google Sign-In | https://drive.google.com/file/d/187yFMvBf0mx_w-dhBRdBnmHPCaMHQYbh/view?usp=sharinghttps://drive.google.com/file/d/187yFMvBf0mx_w-dhBRdBnmHPCaMHQYbh/view?usp=sharing
 | Pedro | Tela de Esqueci a Senha, | integração com firebase (persistência de tarefas e notas, exclusividade de usuário para visualização) |
 | João Lyra |  Tela de Arquivos, setup de firebase, vinculo de cuidador e idoso | 
