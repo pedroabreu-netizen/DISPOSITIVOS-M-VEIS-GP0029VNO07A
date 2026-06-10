@@ -1,9 +1,19 @@
-import 'package:flutter/material.dart';
+import 'dart:typed_data';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart';
+
 import 'models/arquivo_medico.dart';
 import 'navigation/nav_index.dart';
 import 'page_login.dart';
 import 'widgets/nav_bar.dart';
+
+// dart:io só é chamado quando kIsWeb == false, nunca no navegador
+import 'dart:io' as io;
 
 const _kTeal = Color(0xFF5AC87D);
 
@@ -17,81 +27,173 @@ class PageArquivos extends StatefulWidget {
 }
 
 class _PageArquivosState extends State<PageArquivos> {
-  // Estado local — substituir por Provider/Bloc ao integrar com backend
-  final List<ArquivoMedico> _arquivos = [];
   CategoriaArquivo? _filtroAtivo;
   bool _carregando = false;
 
-  /// Categorias que possuem pelo menos um arquivo, em ordem de definição do enum
-  List<CategoriaArquivo> get _categoriasPresentes {
-    final cats = <CategoriaArquivo>{};
-    for (final a in _arquivos) {
-      cats.add(a.categoria);
-    }
-    return cats.toList()..sort((a, b) => a.index.compareTo(b.index));
+  // ── Referências Firebase ──────────────────────────────────────────────────
+  // Declaradas como variáveis (não getters) para serem criadas uma única vez
+  // no initState. Getters recriam o objeto a cada rebuild, o que causa loop
+  // infinito no StreamBuilder pois cada rebuild abre um novo stream.
+  late final String _uid;
+  late final CollectionReference _colecao;
+  late final Reference _storageRef;
+
+  @override
+  void initState() {
+    super.initState();
+    _uid = FirebaseAuth.instance.currentUser?.uid ?? 'usuario_anonimo';
+    _colecao = FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(_uid)
+        .collection('arquivos');
+    _storageRef =
+        FirebaseStorage.instance.ref().child('usuarios/$_uid/arquivos');
   }
 
-  List<ArquivoMedico> get _arquivosFiltrados {
-    if (_filtroAtivo == null) return List.unmodifiable(_arquivos);
-    return _arquivos.where((a) => a.categoria == _filtroAtivo).toList();
-  }
+  // ── Upload ────────────────────────────────────────────────────────────────
 
   Future<void> _escolherArquivo() async {
-    setState(() => _carregando = true);
+    if (mounted) setState(() => _carregando = true);
+
+    FilePickerResult? result;
     try {
-      final result = await FilePicker.pickFiles(
+      result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'],
+        withData: true,
       );
-      if (!mounted || result == null || result.files.isEmpty) return;
-
-      final f = result.files.first;
-
-      // Verificar tamanho máximo (20 MB)
-      if (f.size > 20 * 1024 * 1024) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Arquivo excede o limite de 20 MB.')),
-          );
-        }
-        return;
-      }
-
-      final categoria = await showModalBottomSheet<CategoriaArquivo>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.white,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        builder: (_) => const _SheetCategoria(),
-      );
-      if (!mounted || categoria == null) return;
-
-      setState(() {
-        _arquivos.insert(
-          0,
-          ArquivoMedico(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            nome: f.name,
-            categoria: categoria,
-            dataUpload: DateTime.now(),
-            tamanhoBytes: f.size,
-            extensao: (f.extension ?? 'arquivo').toLowerCase(),
-            caminhoLocal: f.path,
-          ),
+    } catch (e) {
+      if (mounted) {
+        setState(() => _carregando = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao abrir seletor: $e')),
         );
+      }
+      return;
+    }
+
+    // Usuário cancelou o seletor
+    if (result == null || result.files.isEmpty) {
+      if (mounted) setState(() => _carregando = false);
+      return;
+    }
+
+    final f = result.files.first;
+
+    // Valida tamanho (20 MB)
+    if (f.size > 20 * 1024 * 1024) {
+      if (mounted) {
+        setState(() => _carregando = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Arquivo excede o limite de 20 MB.')),
+        );
+      }
+      return;
+    }
+
+    // Escolha de categoria
+    if (!mounted) return;
+    final categoria = await showModalBottomSheet<CategoriaArquivo>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => const _SheetCategoria(),
+    );
+
+    if (!mounted) return;
+    if (categoria == null) {
+      setState(() => _carregando = false);
+      return;
+    }
+
+    // Lê os bytes do arquivo
+    // Na web: f.bytes está disponível via withData: true
+    // No mobile: lê do caminho com dart:io (kIsWeb garante que io.File
+    // nunca é chamado no navegador)
+    Uint8List? bytes;
+    try {
+      if (f.bytes != null) {
+        bytes = f.bytes!;
+      } else if (!kIsWeb && f.path != null) {
+        bytes = await io.File(f.path!).readAsBytes();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _carregando = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao ler arquivo: $e')),
+        );
+      }
+      return;
+    }
+
+    if (bytes == null) {
+      if (mounted) {
+        setState(() => _carregando = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Não foi possível ler o arquivo.')),
+        );
+      }
+      return;
+    }
+
+    // Upload para o Firebase Storage + salva metadados no Firestore
+    try {
+      final nomeNoStorage =
+          '${DateTime.now().millisecondsSinceEpoch}_${f.name}';
+      final ref = _storageRef.child(nomeNoStorage);
+      final metadata = SettableMetadata(contentType: _mimeType(f.extension));
+
+      final snapshot = await ref.putData(bytes, metadata);
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+
+      await _colecao.add({
+        'nome': f.name,
+        'categoria': categoria.name,
+        'dataUpload': FieldValue.serverTimestamp(),
+        'tamanhoBytes': f.size,
+        'extensao': (f.extension ?? 'arquivo').toLowerCase(),
+        'downloadUrl': downloadUrl,
+        'nomeNoStorage': nomeNoStorage,
       });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Arquivo enviado com sucesso!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao enviar: $e')),
+        );
+      }
     } finally {
       if (mounted) setState(() => _carregando = false);
     }
   }
 
-  void _excluirArquivo(String id) {
+  String _mimeType(String? ext) => switch (ext?.toLowerCase()) {
+        'pdf' => 'application/pdf',
+        'jpg' || 'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
+        'doc' => 'application/msword',
+        'docx' =>
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        _ => 'application/octet-stream',
+      };
+
+  // ── Delete ────────────────────────────────────────────────────────────────
+
+  void _excluirArquivo(String docId, String nomeNoStorage) {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Excluir arquivo',
             style: TextStyle(fontWeight: FontWeight.bold)),
         content: const Text('Tem certeza que deseja excluir este arquivo?',
@@ -102,9 +204,18 @@ class _PageArquivosState extends State<PageArquivos> {
             child: const Text('Cancelar'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(ctx);
-              setState(() => _arquivos.removeWhere((a) => a.id == id));
+              try {
+                await _storageRef.child(nomeNoStorage).delete();
+                await _colecao.doc(docId).delete();
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erro ao excluir: $e')),
+                  );
+                }
+              }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Excluir'),
@@ -113,6 +224,31 @@ class _PageArquivosState extends State<PageArquivos> {
       ),
     );
   }
+
+  // ── Conversão Firestore → objeto ──────────────────────────────────────────
+
+  ArquivoMedico _docParaArquivo(QueryDocumentSnapshot doc) {
+    final d = doc.data() as Map<String, dynamic>;
+    final ts = d['dataUpload'];
+    final dataUpload = ts is Timestamp ? ts.toDate() : DateTime.now();
+    final categoriaStr = d['categoria'] as String? ?? 'outros';
+    final categoria = CategoriaArquivo.values.firstWhere(
+      (c) => c.name == categoriaStr,
+      orElse: () => CategoriaArquivo.outros,
+    );
+    return ArquivoMedico(
+      id: doc.id,
+      nome: d['nome'] ?? '',
+      categoria: categoria,
+      dataUpload: dataUpload,
+      tamanhoBytes: d['tamanhoBytes'] ?? 0,
+      extensao: d['extensao'] ?? 'arquivo',
+      downloadUrl: d['downloadUrl'],
+      nomeNoStorage: d['nomeNoStorage'] ?? '',
+    );
+  }
+
+  // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -162,53 +298,71 @@ class _PageArquivosState extends State<PageArquivos> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _UploadCard(
-                      carregando: _carregando,
-                      onPressed: _escolherArquivo,
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _colecao.orderBy('dataUpload', descending: true).snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(child: Text('Erro ao carregar arquivos.'));
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final todos = snapshot.data!.docs.map(_docParaArquivo).toList();
+
+          final filtrados = _filtroAtivo == null
+              ? todos
+              : todos.where((a) => a.categoria == _filtroAtivo).toList();
+
+          final categorias = (<CategoriaArquivo>{}
+                ..addAll(todos.map((a) => a.categoria)))
+              .toList()
+            ..sort((a, b) => a.index.compareTo(b.index));
+
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _UploadCard(
+                    carregando: _carregando,
+                    onPressed: _escolherArquivo,
+                  ),
+                  const SizedBox(height: 16),
+                  if (todos.isNotEmpty) ...[
+                    _FiltroBar(
+                      categorias: categorias,
+                      filtroAtivo: _filtroAtivo,
+                      onChanged: (f) => setState(() => _filtroAtivo = f),
                     ),
-                    const SizedBox(height: 16),
-                    if (_arquivos.isNotEmpty) ...[
-                      _FiltroBar(
-                        categorias: _categoriasPresentes,
-                        filtroAtivo: _filtroAtivo,
-                        onChanged: (f) => setState(() => _filtroAtivo = f),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-                    if (_arquivos.isEmpty)
-                      const _EstadoVazio()
-                    else if (_arquivosFiltrados.isEmpty)
-                      _EstadoVazioFiltro(
-                        onLimpar: () => setState(() => _filtroAtivo = null),
-                      )
-                    else
-                      ..._arquivosFiltrados.map(
-                        (a) => _ArquivoCard(
-                          arquivo: a,
-                          onExcluir: () => _excluirArquivo(a.id),
-                        ),
-                      ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
                   ],
-                ),
+                  if (todos.isEmpty)
+                    const _EstadoVazio()
+                  else if (filtrados.isEmpty)
+                    _EstadoVazioFiltro(
+                      onLimpar: () => setState(() => _filtroAtivo = null),
+                    )
+                  else
+                    ...filtrados.map(
+                      (a) => _ArquivoCard(
+                        arquivo: a,
+                        onExcluir: () =>
+                            _excluirArquivo(a.id, a.nomeNoStorage ?? ''),
+                      ),
+                    ),
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
-          ),
-        ],
+          );
+        },
       ),
-      bottomNavigationBar: NavBar(
-        currentIndex: 3,
-        onTap: (index) => navigateByIndex(context, 3, index),
-      ),
+      //bottomNavigationBar: NavBar(
+      //  currentIndex: 3,
+      //  onTap: (index) => navigateByIndex(context, 3, index),
+      //),
     );
   }
 }
@@ -616,4 +770,3 @@ class _SheetCategoria extends StatelessWidget {
     );
   }
 }
-
