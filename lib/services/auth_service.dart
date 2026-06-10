@@ -24,8 +24,8 @@ class AuthService {
         password: senha.trim(),
       );
     } on FirebaseAuthException catch (e) {
-      print('Código: ${e.code}');
-      print('Mensagem: ${e.message}');
+      debugPrint('Código: ${e.code}');
+      debugPrint('Mensagem: ${e.message}');
       rethrow;
     }
   }
@@ -53,7 +53,9 @@ class AuthService {
   Future<UserCredential> entrarComGoogle() async {
     try {
       if (kIsWeb) {
-        final credencial = await _auth.signInWithPopup(GoogleAuthProvider());
+        final provider = GoogleAuthProvider()
+          ..setCustomParameters({'hd': 'souunit.com.br'});
+        final credencial = await _auth.signInWithPopup(provider);
         return await _validarDominioGoogle(credencial);
       }
 
@@ -67,6 +69,12 @@ class AuthService {
       }
 
       final contaGoogle = await _googleSignIn.authenticate();
+
+      if (!isDomainValid(contaGoogle.email)) {
+        await _googleSignIn.signOut();
+        throw Exception('Acesso permitido apenas para contas @souunit.com.br');
+      }
+
       final idToken = contaGoogle.authentication.idToken;
 
       if (idToken == null) {
@@ -111,6 +119,7 @@ class AuthService {
       return credencial;
     }
 
+    await _removerUsuarioNaoAutorizado(credencial.user);
     await _auth.signOut();
 
     if (!kIsWeb) {
@@ -118,6 +127,22 @@ class AuthService {
     }
 
     throw Exception('Acesso permitido apenas para contas @souunit.com.br');
+  }
+
+  Future<void> _removerUsuarioNaoAutorizado(User? usuario) async {
+    if (usuario == null) {
+      return;
+    }
+
+    try {
+      await usuario.delete();
+    } on FirebaseAuthException catch (e) {
+      debugPrint(
+        'Não foi possível remover usuário não autorizado: ${e.code} - ${e.message}',
+      );
+    } catch (e) {
+      debugPrint('Não foi possível remover usuário não autorizado: $e');
+    }
   }
 
   String _mensagemErroGoogle(GoogleSignInException erro) {

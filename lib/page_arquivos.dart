@@ -406,7 +406,8 @@ class _UploadCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _kTeal,
                   foregroundColor: Colors.white,
-                  disabledBackgroundColor: _kTeal.withValues(alpha: 0.5),
+                  disabledBackgroundColor:
+                      _kTeal.withValues(alpha: 0.5),
                   shape: const StadiumBorder(),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   elevation: 0,
@@ -416,16 +417,12 @@ class _UploadCard extends StatelessWidget {
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
+                            color: Colors.white, strokeWidth: 2),
                       )
                     : const Text(
                         'Escolher arquivo',
                         style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
+                            fontSize: 16, fontWeight: FontWeight.w600),
                       ),
               ),
             ),
@@ -529,10 +526,7 @@ class _ArquivoCard extends StatelessWidget {
 
   static const Map<CategoriaArquivo, ({Color bg, Color text})> _badgeColors = {
     CategoriaArquivo.exame: (bg: Color(0xFFE3F2FD), text: Color(0xFF1976D2)),
-    CategoriaArquivo.prescricao: (
-      bg: Color(0xFFF3E5F5),
-      text: Color(0xFF7B1FA2),
-    ),
+    CategoriaArquivo.prescricao: (bg: Color(0xFFF3E5F5), text: Color(0xFF7B1FA2)),
     CategoriaArquivo.laudo: (bg: Color(0xFFE8F5E9), text: Color(0xFF2E7D32)),
     CategoriaArquivo.receita: (bg: Color(0xFFFFF8E1), text: Color(0xFFF57F17)),
     CategoriaArquivo.outros: (bg: Color(0xFFF5F5F5), text: Color(0xFF616161)),
@@ -588,18 +582,14 @@ class _ArquivoCard extends StatelessWidget {
                   Text(
                     arquivo.tamanhoFormatado,
                     style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF9E9E9E),
-                    ),
+                        fontSize: 13, color: Color(0xFF9E9E9E)),
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 5,
-                        ),
+                            horizontal: 12, vertical: 5),
                         decoration: BoxDecoration(
                           color: badge.bg,
                           borderRadius: BorderRadius.circular(20),
@@ -617,9 +607,7 @@ class _ArquivoCard extends StatelessWidget {
                       Text(
                         _formatarData(arquivo.dataUpload),
                         style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF9E9E9E),
-                        ),
+                            fontSize: 13, color: Color(0xFF9E9E9E)),
                       ),
                     ],
                   ),
@@ -676,10 +664,7 @@ class _EstadoVazio extends StatelessWidget {
               'Envie seus exames e documentos\nutilizando o botão acima.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 14,
-                color: Color(0xFFBDBDBD),
-                height: 1.5,
-              ),
+                  fontSize: 14, color: Color(0xFFBDBDBD), height: 1.5),
             ),
           ],
         ),
@@ -700,19 +685,15 @@ class _EstadoVazioFiltro extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.filter_list_off_rounded,
-              size: 48,
-              color: Color(0xFFBDBDBD),
-            ),
+            const Icon(Icons.filter_list_off_rounded,
+                size: 48, color: Color(0xFFBDBDBD)),
             const SizedBox(height: 12),
             const Text(
               'Nenhum arquivo nesta categoria',
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF9E9E9E),
-              ),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF9E9E9E)),
             ),
             const SizedBox(height: 12),
             TextButton(
@@ -755,18 +736,15 @@ class _SheetCategoria extends StatelessWidget {
             const Text(
               'Qual o tipo do arquivo?',
               style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF212121),
-              ),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF212121)),
             ),
             const SizedBox(height: 8),
             ...CategoriaArquivo.values.map(
               (cat) => ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 4,
-                  vertical: 2,
-                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 leading: Container(
                   width: 44,
                   height: 44,
@@ -779,13 +757,10 @@ class _SheetCategoria extends StatelessWidget {
                 title: Text(
                   cat.label,
                   style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w500,
-                  ),
+                      fontSize: 17, fontWeight: FontWeight.w500),
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                    borderRadius: BorderRadius.circular(12)),
                 onTap: () => Navigator.pop(context, cat),
               ),
             ),

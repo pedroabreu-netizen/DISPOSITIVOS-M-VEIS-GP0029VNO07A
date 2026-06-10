@@ -1,4 +1,3 @@
-import 'package:dispositivos_moveis_gp0029vno07a/widgets/nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -8,7 +7,7 @@ import 'page_esqueci_senha.dart';
 import 'services/auth_service.dart';
 import 'utils/app_colors.dart';
 import 'widgets/custom_text_field.dart';
-import 'widgets/social_login_button.dart';
+import 'widgets/entrar_com_google_button.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -218,7 +217,7 @@ class _LoginPageState extends State<LoginPage> {
                             ],
                           ),
                           SizedBox(height: isShort ? 26 : 32),
-                          SocialLoginButton(
+                          EntrarComGoogleButton(
                             onPressed: () {
                               _autenticar(() async {
                                 await AuthService().entrarComGoogle();
@@ -247,7 +246,7 @@ class _LoginPageState extends State<LoginPage> {
       }
 
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainScaffold()),
+        MaterialPageRoute(builder: (context) => const HomePage()),
       );
     } catch (e) {
       _mostrarErro(_mensagemErro(e));
