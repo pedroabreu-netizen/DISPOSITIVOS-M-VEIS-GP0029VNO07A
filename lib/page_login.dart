@@ -1,4 +1,3 @@
-import 'package:dispositivos_moveis_gp0029vno07a/widgets/nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -247,7 +246,7 @@ class _LoginPageState extends State<LoginPage> {
       }
 
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainScaffold()),
+        MaterialPageRoute(builder: (context) => const HomePage()),
       );
     } catch (e) {
       _mostrarErro(_mensagemErro(e));
