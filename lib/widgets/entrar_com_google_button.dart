@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../utils/app_colors.dart';
 
-class SocialLoginButton extends StatelessWidget {
-  const SocialLoginButton({required this.onPressed, super.key});
+class EntrarComGoogleButton extends StatelessWidget {
+  const EntrarComGoogleButton({required this.onPressed, super.key});
 
   final VoidCallback onPressed;
 
