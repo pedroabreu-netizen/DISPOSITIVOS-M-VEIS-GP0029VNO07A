@@ -1,8 +1,7 @@
 import 'dart:convert';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 
 import 'nota.dart';
 import 'navigation/nav_index.dart';
@@ -17,14 +16,10 @@ class PageNotas extends StatefulWidget {
 }
 
 class _PageNotasState extends State<PageNotas> {
-  CollectionReference get _notasCollection {
-    final String userId =
-        FirebaseAuth.instance.currentUser?.uid ?? 'usuario_anonimo';
-    return FirebaseFirestore.instance
-        .collection('usuarios')
-        .doc(userId)
-        .collection('notas');
-  }
+  final CollectionReference _notasCollection = FirebaseFirestore.instance
+      .collection('usuarios')
+      .doc('usuario_teste')
+      .collection('notas');
 
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _descricaoController = TextEditingController();
@@ -59,8 +54,6 @@ class _PageNotasState extends State<PageNotas> {
 
   Future<void> _salvarNota(String? id) async {
     if (_tituloController.text.trim().isEmpty) return;
-    final usuarioAtual = FirebaseAuth.instance.currentUser;
-    final emailUsuario = usuarioAtual?.email ?? 'errado';
 
     final tags = _selectedCategorias.isNotEmpty
         ? _selectedCategorias.toList()
@@ -82,7 +75,6 @@ class _PageNotasState extends State<PageNotas> {
       tags: tags,
       data: dataNota,
       concluida: false,
-      criadoPor: emailUsuario,
     );
 
     if (id == null) {
@@ -434,11 +426,9 @@ class _PageNotasState extends State<PageNotas> {
           }).toList();
 
           final exibidos = deNoSQLParaLista
-              .where(
-                (n) =>
-                    n.titulo.toLowerCase().contains(_filtro.toLowerCase()) ||
-                    n.descricao.toLowerCase().contains(_filtro.toLowerCase()),
-              )
+              .where((n) =>
+                  n.titulo.toLowerCase().contains(_filtro.toLowerCase()) ||
+                  n.descricao.toLowerCase().contains(_filtro.toLowerCase()))
               .toList();
 
           if (exibidos.isEmpty) {
@@ -476,22 +466,14 @@ class _PageNotasState extends State<PageNotas> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: const Icon(
-                                  Icons.edit,
-                                  color: Colors.blue,
-                                  size: 20,
-                                ),
+                                icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
                                 onPressed: () => _mostrarFormulario(nota),
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(),
                               ),
                               const SizedBox(width: 8),
                               IconButton(
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Color.fromARGB(255, 220, 38, 38),
-                                  size: 20,
-                                ),
+                                icon: const Icon(Icons.delete, color: Color.fromARGB(255, 220, 38, 38), size: 20),
                                 onPressed: () => _excluirNota(nota.id!),
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(),
@@ -503,11 +485,7 @@ class _PageNotasState extends State<PageNotas> {
                       const SizedBox(height: 8),
                       Text(
                         nota.descricao,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF52606D),
-                          height: 1.5,
-                        ),
+                        style: const TextStyle(fontSize: 14, color: Color(0xFF52606D), height: 1.5),
                       ),
                       if (nota.tags.isNotEmpty) ...[
                         const SizedBox(height: 12),
@@ -516,19 +494,10 @@ class _PageNotasState extends State<PageNotas> {
                           runSpacing: 6,
                           children: nota.tags.map((tag) {
                             return Chip(
-                              label: Text(
-                                tag,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF2563EB),
-                                ),
-                              ),
+                              label: Text(tag, style: const TextStyle(fontSize: 12, color: Color(0xFF2563EB))),
                               backgroundColor: const Color(0xFFE8F1FF),
                               side: BorderSide.none,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 0,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
                             );
                           }).toList(),
                         ),
@@ -537,11 +506,7 @@ class _PageNotasState extends State<PageNotas> {
                         const SizedBox(height: 12),
                         Text(
                           nota.data!,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF486581),
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: const TextStyle(fontSize: 12, color: Color(0xFF486581), fontWeight: FontWeight.w600),
                         ),
                       ],
                     ],
@@ -569,10 +534,10 @@ class _PageNotasState extends State<PageNotas> {
         ),
       ),
 
-      // bottomNavigationBar: NavBar(
-      //   currentIndex: 2,
-      //   onTap: (index) => navigateByIndex(context, 2, index),
-      // ),
+      bottomNavigationBar: NavBar(
+        currentIndex: 2,
+        onTap: (index) => navigateByIndex(context, 2, index),
+      ),
     );
   }
 }
