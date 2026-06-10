@@ -11,4 +11,4 @@ Cada membro ficou com um "fluxo" específico do app, sendo as tasks respectivas 
 | Flávia Monique | Front - telas inicial, cadastro de atividades e visualização das atividades | Back - Validação de dominio @souunit.com.br, armazenamento das informações de cadastro no firebase |  https://drive.google.com/file/d/1BX3aqR4BaEHGUbKrTNG0N9bGTVUe-6UV/view?usp=sharing |
 | João Luís | Telas relacionadas ao fluxo de login e cadastro | Back - Autenticaçåo por Google Sign-In | https://drive.google.com/file/d/187yFMvBf0mx_w-dhBRdBnmHPCaMHQYbh/view?usp=sharinghttps://drive.google.com/file/d/187yFMvBf0mx_w-dhBRdBnmHPCaMHQYbh/view?usp=sharing
 | Pedro | Tela de Esqueci a Senha, | integração com firebase (persistência de tarefas, arquivos e notas, exclusividade de usuário para visualização) | https://drive.google.com/file/d/1DENO8eA0j_AnXivubbBRypx_uuG-iWJg/view?usp=sharing
-| João Lyra |  Tela de Arquivos, setup de firebase, vinculo de cuidador e idoso | 
+| João Lyra |  Tela de Arquivos, Tela de vínculo | Setup Firebase, vinculo de cuidador e idoso | https://youtu.be/IML05ukGUkQ 
