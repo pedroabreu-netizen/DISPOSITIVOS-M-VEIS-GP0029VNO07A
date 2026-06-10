@@ -11,7 +11,7 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _emailController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  //final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _emailSent = false;
 
@@ -37,12 +37,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.08),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.08), end: Offset.zero).animate(
+          CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+        );
     _animationController.forward();
   }
 
@@ -215,11 +213,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
           const SizedBox(height: 10),
           Text(
             'Informe seu e-mail cadastrado para redefinir sua senha.',
-            style: TextStyle(
-              fontSize: 14,
-              color: _textMuted,
-              height: 1.55,
-            ),
+            style: TextStyle(fontSize: 14, color: _textMuted, height: 1.55),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -244,10 +238,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             child: RichText(
               text: TextSpan(
                 text: 'Lembrou a senha? ',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: _textMuted,
-                ),
+                style: TextStyle(fontSize: 14, color: _textMuted),
                 children: const [
                   TextSpan(
                     text: 'Fazer login',
@@ -292,10 +283,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: _primaryGreen,
-            width: 1.8,
-          ),
+          borderSide: const BorderSide(color: _primaryGreen, width: 1.8),
         ),
         prefixIcon: Icon(
           Icons.email_outlined,
@@ -411,11 +399,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
-              style: TextStyle(
-                fontSize: 14,
-                color: _textMuted,
-                height: 1.6,
-              ),
+              style: TextStyle(fontSize: 14, color: _textMuted, height: 1.6),
               children: [
                 const TextSpan(text: 'Enviamos as instruções para '),
                 TextSpan(
